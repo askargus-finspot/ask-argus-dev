@@ -1,0 +1,543 @@
+// =============================================================================
+// AskArgus Observability Stack — Accurate DBML Schema for DBdocs.io
+// Generated from live data: 2026-04-13
+//
+// Sources:
+//   1. Elasticsearch   — infra-elasticsearch (Docker) at http://localhost:9200
+//      Index: journal-log | 358,336 docs | 190.3 MB
+//      Source file: C:\Users\VediyappanMAskArgus\Desktop\mcps\Journal.log.txt
+//
+//   2. Prometheus TSDB — https://prometheus-fs-le-isv.AskArgus.in/
+//      Scraped via MCP container: prometheus-mcp-server-8081
+//      427 real metrics across 7 scrape jobs
+// =============================================================================
+
+Project AskArgus_observability {
+  database_type: 'Elasticsearch + Prometheus TSDB'
+  Note: '''
+    # AskArgus Observability Platform
+
+    **Two data stores documented here:**
+
+    ## 1. Elasticsearch — `journal-log` Index
+    - Container: `infra-elasticsearch` (Docker, localhost:9200)
+    - Index: `journal-log`  |  **358,336 documents**  |  190.3 MB
+    - Purpose: Stores parsed trading order-update and login/logout events
+      from the broker gateway (Norenautomation / NSE/BSE FIX protocol).
+    - Source: `Journal.log.txt` ingested via Python pipeline
+    - Primary event type: `ordupd` (357,701 docs), `login` (623), `logout` (12)
+
+    ## 2. Prometheus TSDB
+    - Remote URL: `https://prometheus-fs-le-isv.AskArgus.in/`
+    - **427 real metrics** — counter(288), gauge(200), histogram(74),
+      summary(18), unknown(47)
+    - Scrape Jobs:
+      - `kubernetes-apiservers`     — K8s API server (10.10.0.101:6443)
+      - `kubernetes-nodes`          — Kubelet node metrics (fs-le-isv)
+      - `kubernetes-cadvisor`       — Container resource usage (fs-le-isv)
+      - `kubernetes-service-endpoints` — CoreDNS, Prometheus self
+      - `kube-state-metrics`        — K8s object state
+      - `SNMP-*`                    — FortiGate, Huawei, Cisco devices
+      - `WINDOWS_EXPORTR-*`         — 11 Windows Server nodes (9182)
+      - `router`                    — Router exporter (currently down)
+    - TSDB is NOT relational; tables below are logical documentation models.
+  '''
+}
+
+
+// =============================================================================
+// ELASTICSEARCH SECTION
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// Main document table — one row per journal-log event
+// Real enum values derived from aggregations across 358,336 live documents
+// -----------------------------------------------------------------------------
+Table es_journal_log {
+  es_doc_id             varchar       [pk, not null, note: 'Elasticsearch _id (auto-generated string, e.g. AK0TbZ0BULisX1Oyi2mx)']
+  "@timestamp"          timestamp     [not null, note: 'Event timestamp from the trading gateway (UTC). Example: 2026-03-24T09:43:41.000Z. ES type: date']
+  ingested_at           timestamp     [not null, note: 'Timestamp when the document was indexed by the Python ingestor. Example: 2026-04-08T12:31:30.71Z. ES type: date']
+  msg_type              varchar(20)   [not null, note: 'Message type from gateway log. Observed values: ordupd (357,701 docs), login (623 docs), logout (12 docs). ES type: keyword']
+  msg_seq               bigint        [not null, note: 'Sequential message number within the source file. Used for ordering and deduplication. ES type: long']
+  source_file           varchar(255)  [note: 'Filename of the ingested log file. e.g. Journal.log.txt. ES type: keyword']
+  source_path           varchar(1024) [note: 'Full filesystem path to the source file at ingestion time. ES type: keyword']
+
+  // --- Order Identity ---
+  NorenOrdNum           bigint        [note: 'Norenautomation (broker platform) internal order number. Unique per order. e.g. 26032400092187. ES type: long']
+  ClOrdId               text          [note: 'Client Order ID assigned by the trading application. e.g. GH1zCAJ5OsW5SGwF. ES type: text+keyword']
+  OrgClOrdId            text          [note: 'Original Client Order ID (before any modification). ES type: text+keyword']
+  ExchOrdNum            text          [note: 'Exchange-assigned order number. e.g. 1300000441371769. ES type: text+keyword']
+  FillId                text          [note: 'Exchange fill/trade ID (populated only on fill events). e.g. 21969670. ES type: text+keyword']
+  BasketOrderId         bigint        [note: 'Parent basket order ID for basket/algo orders. ES type: long']
+  AlgoId                text          [note: 'Algorithm identifier for algo/DMA orders. ES type: text+keyword']
+  Seqno                 bigint        [note: 'Internal Noren sequence number for this order update event. ES type: long']
+
+  // --- User & Account ---
+  UserId                text          [note: 'Trading user ID (broker client code). e.g. CS31355316, CS4696341. ES type: text+keyword']
+  AcctId                text          [note: 'Account ID associated with the order (usually same as UserId for retail). ES type: text+keyword']
+  BrokerId              text          [note: 'Broker identifier. Observed value: LEMONN. ES type: text+keyword']
+  SrcUserId             text          [note: 'Source system user ID (may differ from UserId for admin/OBO orders). ES type: text+keyword']
+  ParticId              text          [note: 'Participant ID at exchange level. ES type: text+keyword']
+  ExchUserId            text          [note: 'User ID registered at exchange. e.g. 12492. ES type: text+keyword']
+  ExchUserInfo          text          [note: 'Extended exchange user info string. e.g. 333333333333100. ES type: text+keyword']
+  PanNum                text          [note: 'PAN number of the client (masked for compliance). e.g. BRXPB4383A. ES type: text+keyword']
+  FamilyId              text          [note: 'Family/group ID for the account. Observed values: HO (357,646), MUMBAI (46), MAIN (6), NA (3). ES type: text+keyword']
+  CustFirm              varchar(5)    [note: 'Customer or firm indicator. Observed value: C = Customer (357,701 docs). ES type: text+keyword']
+  LoginProcId           text          [note: 'Process ID of the login session (populated for login events). ES type: text+keyword']
+  UserSessId            text          [note: 'Session ID assigned at login. ES type: text+keyword']
+  UserPrivilege         bigint        [note: 'User privilege bitmask (exchange-level). e.g. 5. ES type: long']
+  Region                text          [note: 'Geographic region of the user. e.g. WEST DELHI. ES type: text+keyword']
+  UiDevCode             text          [note: 'UI device code for the client platform. ES type: text+keyword']
+  IpAddr                text          [note: 'IP address of the client device at order time. ES type: text+keyword']
+  AccessType            varchar(10)   [note: 'Access type/mode. Observed values: FU = Full (604 docs), TT = Thin Terminal (31 docs). ES type: text+keyword']
+  DevicePinFlag         boolean       [note: 'Whether the device PIN was verified. ES type: boolean']
+
+  // --- Instrument (Trading Symbol) ---
+  TradingSymbol         text          [not null, note: 'NSE/BSE trading symbol. e.g. NIFTY24MAR26P22900, RELIANCE, BANKNIFTY23DEC26C44000. ES type: text+keyword']
+  Token                 text          [note: 'Exchange numerical token for the instrument. e.g. 62567. ES type: text+keyword']
+  ExchSeg               varchar(10)   [not null, note: 'Exchange segment. Observed: NFO=314,367 | NSE=22,273 | BFO=20,395 | BSE=666. ES type: text+keyword']
+  ExchSegAcctId         text          [note: 'Account ID scoped to this exchange segment. ES type: text+keyword']
+  Product               varchar(5)    [note: 'Product type. Observed: M=NRML 331,756 | I=Intraday 10,974 | F=Futures 8,626 | C=Cover 6,345. ES type: text+keyword']
+  PriceType             varchar(10)   [note: 'Order price type. Observed: MKT=213,182 | LMT=138,896 | DS=3,160 | SL-LMT=2,404 | SL-MKT=59. ES type: text+keyword']
+  OrdDuration           varchar(10)   [note: 'Order validity (time-in-force). Observed: DAY=354,410 | IOC=2,788 | EOTODY=383 | EOS=79 | EOSESS=41. ES type: text+keyword']
+  TransType             varchar(5)    [note: 'Transaction side. Observed: B=Buy 191,666 | S=Sell 166,035. ES type: text+keyword']
+  OrdSrc                varchar(20)   [note: 'Order origination channel. Observed: MOB=305,704 | TO=26,336 | CPPAPI=15,354 | TT=4,930 | API=2,773 | JOB=1,281 | mobile=1,101 | RED=192 | ORA=30. ES type: text+keyword']
+  OrgOrdSrc             varchar(20)   [note: 'Original order source (before modification). ES type: text+keyword']
+  RejOrdSrc             text          [note: 'Order source for the rejected leg. ES type: text+keyword']
+  StreamId              text          [note: 'Stream identifier for the connection/session. e.g. 5. ES type: text+keyword']
+
+  // --- Order Quantities ---
+  QtyToFill             bigint        [note: 'Quantity (shares/lots) ordered. Also called order quantity. e.g. 780. ES type: long']
+  DiscQty               bigint        [note: 'Disclosed quantity (iceberg). 0 = fully disclosed. ES type: long']
+  FillQty               bigint        [note: 'Quantity filled in this specific fill event. ES type: long']
+  TotalFillQty          bigint        [note: 'Cumulative filled quantity across all fills for this order. ES type: long']
+  CancelledQty          bigint        [note: 'Quantity cancelled from the order. ES type: long']
+  RejQty                bigint        [note: 'Quantity rejected. ES type: long']
+  RedQty                bigint        [note: 'Pending/remaining quantity to be filled. e.g. 780. ES type: long']
+
+  // --- Prices (in broker paise/ticks — divide by price precision for INR) ---
+  PriceToFill           bigint        [note: 'Limit/trigger price submitted. 0 for MKT orders. ES type: long']
+  TriggerPrice          bigint        [note: 'Stop-loss trigger price. ES type: long']
+  FillPrice             bigint        [note: 'Price at which this fill executed. e.g. 150 (= ₹1.50 for precision 2). ES type: long']
+  FillAvgPrice          bigint        [note: 'Volume-weighted average fill price across all fills. ES type: long']
+  RedPrice              bigint        [note: 'Pending/last working price. e.g. 180. ES type: long']
+
+  // --- Modification / Reduction fields (RedXxx = pending after partial fill/cancel) ---
+  RedOrgPrice           bigint        [note: 'Original price before reduction/modification. ES type: long']
+  RedOrgQty             bigint        [note: 'Original quantity before reduction/modification. ES type: long']
+  RedOrgTriggerPrice    bigint        [note: 'Original trigger price before reduction. ES type: long']
+  RedTriggerPrice       bigint        [note: 'Pending trigger price after reduction. ES type: long']
+  RedCheck              boolean       [note: 'Flag indicating whether a reduction was applied. ES type: boolean']
+  RedSuperUser          boolean       [note: 'Whether the reduction was performed by a super-user/admin. ES type: boolean']
+
+  // --- Order Status Codes (NSE FIX-like numeric codes) ---
+  OrdStatus             bigint        [note: 'Numeric order status code. Observed: 50=Filled | 48=New/Pending | 52=Partially Filled | 56=Rejected | 115=Cancelled | 110 | 65 | 88 | 69 | 119. ES type: long']
+  GuiStatus             bigint        [note: 'GUI display status code. Mirrors OrdStatus for UI rendering. Observed: 48 | 65 | 50 | 52 | 56 | 115 | 110. ES type: long']
+  ReportType            bigint        [note: 'FIX ExecType report code. Observed: 49=Fill | 110=New | 48=PendingNew | 109=Modify | 53=PartialFill | 52=PendingModify | 54=PendingCancel | 56=Reject | 98=Cancelled | 115 | 65 | 116 | 114 | 117 | 88 | 66 | 120. ES type: long']
+  ReqStatus             text          [note: 'Request status string from gateway. ES type: text+keyword']
+  Eref                  bigint        [note: 'Exchange reference number for the event. ES type: long']
+
+  // --- Exchange Timestamps (nanoseconds epoch) ---
+  ExchTimeStamp         bigint        [note: 'Exchange event timestamp (Unix epoch, seconds). e.g. 1774345421. ES type: long']
+  ExchNsecs             bigint        [note: 'Exchange nanosecond component of the timestamp. e.g. 1458832421579070801. ES type: long']
+  NorenTimeStamp        bigint        [note: 'Noren platform event timestamp (Unix epoch, seconds). ES type: long']
+  NorenNsecs            bigint        [note: 'Noren nanosecond component of the timestamp. ES type: long']
+  NorenOrgTimeStamp     bigint        [note: 'Original order placement timestamp in Noren (Unix epoch, sec). ES type: long']
+  NorenOrgNsecs         bigint        [note: 'Nanosecond component of NorenOrgTimeStamp. ES type: long']
+  ExchSeqNum            bigint        [note: 'Exchange sequence number for event ordering. e.g. 95606136989135. ES type: long']
+  ExchSeqNumS           text          [note: 'Exchange sequence number as string (for display). ES type: text+keyword']
+  ExchExpiryDate        bigint        [note: 'Top-level expiry date (Unix epoch, sec) when embedded in root. ES type: long']
+  OrgExchTime           text          [note: 'Original exchange time as string. e.g. 1458832421. ES type: text+keyword']
+
+  // --- Fill Event Fields ---
+  FillTime              text          [note: 'Fill execution time as formatted string. e.g. 24-03-2026 15:13:41. ES type: text+keyword']
+  FillLeg               bigint        [note: 'Leg number for spread/combo fills. ES type: long']
+  LocId                 bigint        [note: 'Location ID for the fill (exchange partition). ES type: long']
+  LastAttemptCount      bigint        [note: 'Number of retry attempts made for this order. ES type: long']
+
+  // --- Remarks / Messages ---
+  OrdRemarks            text          [note: 'Free-text order remarks from client. e.g. "Order placed from mobile app". ES type: text']
+  RejReason             text          [note: 'Rejection reason text from exchange. Empty string when not rejected. ES type: text+keyword']
+  RejBy                 text          [note: 'Entity that rejected the order (exchange code or broker). ES type: text+keyword']
+  RejPriceType          text          [note: 'Price type at the time of rejection. ES type: text+keyword']
+  FixRemarks            text          [note: 'FIX protocol level remarks/reference. e.g. L522204437. ES type: text+keyword']
+  Msg                   text          [note: 'Generic message field from gateway (login/logout events). ES type: text']
+  AddlSrcInfoes         text          [note: 'Additional source information array (serialised). ES type: text']
+
+  // --- Spread / Multi-Leg Fields ---
+  SpreadToken           text          [note: 'Token for spread instrument (multi-leg). ES type: text+keyword']
+  SpreadTradingSymbol   text          [note: 'Trading symbol for the spread contract. ES type: text+keyword']
+  InteropExchSeg        text          [note: 'Interoperability exchange segment for cross-exchange spreads. ES type: text+keyword']
+  InteropKey            text          [note: 'Interoperability key for cross-exchange matching. ES type: text+keyword']
+  Amo                   boolean       [note: 'After Market Order flag. ES type: boolean']
+  MinRedemFlag          boolean       [note: 'Minimum redemption flag for MF/debt orders. ES type: boolean']
+  MktProtection         float         [note: 'Market protection percentage for MKT orders. ES type: float']
+
+  // --- Leg 2 Mirror Fields (Spread second leg) ---
+  TradingSymbolLeg2     text          [note: 'Trading symbol for leg 2 of a spread order. ES type: text+keyword']
+  TokenLeg2             text          [note: 'Exchange token for leg 2. ES type: text+keyword']
+  TransTypeLeg2         text          [note: 'Transaction side for leg 2 (B/S). ES type: text+keyword']
+  QtyToFillLeg2         bigint        [note: 'Order quantity for leg 2. ES type: long']
+  PriceToFillLeg2       bigint        [note: 'Limit price for leg 2. ES type: long']
+  FillQtyLeg2           bigint        [note: 'Fill quantity for leg 2 (mirrors FillQty for spread leg). ES type: long']
+  FillAvgPriceLeg2      bigint        [note: 'Average fill price for leg 2. ES type: long']
+  TotalFillQtyLeg2      bigint        [note: 'Total filled quantity for leg 2. ES type: long']
+  CancelledQtyLeg2      bigint        [note: 'Cancelled quantity for leg 2. ES type: long']
+  RedOrgPriceLeg2       bigint        [note: 'Original price before reduction for leg 2. ES type: long']
+  RedOrgQtyLeg2         bigint        [note: 'Original quantity before reduction for leg 2. ES type: long']
+  RedPriceLeg2          bigint        [note: 'Pending price for leg 2. ES type: long']
+  RedQtyLeg2            bigint        [note: 'Pending quantity for leg 2. ES type: long']
+  RedTriggerPriceLeg2   bigint        [note: 'Pending trigger price for leg 2. ES type: long']
+
+  // --- Subdocument JSON columns (denormalised) ---
+  Scripupdate_json      json          [note: 'Raw JSON snapshot of the Scripupdate nested object (instrument metadata). Normalised into es_journal_log__Scripupdate table.']
+  ScripupdateSpread_json json         [note: 'Raw JSON of ScripupdateSpread object (spread instrument metadata). Normalised into es_journal_log__ScripupdateSpread.']
+  scripupdateLEG2_json  json          [note: 'Raw JSON of scripupdateLEG2 object (leg 2 instrument metadata). Normalised into es_journal_log__scripupdateLEG2.']
+  TimeStamps_json       json          [note: 'Raw JSON of TimeStamps object (detailed Noren processing latency timestamps). Normalised into es_journal_log__TimeStamps.']
+  Userdetails_json      json          [note: 'Raw JSON of Userdetails object (user profile snapshot, populated on login events). Normalised into es_journal_log__Userdetails.']
+  NorenKidId            bigint        [note: 'Noren Kid (session slot) ID. e.g. 1. ES type: long']
+
+  Note: '''
+    Elasticsearch index `journal-log` modelled as a relational table.
+    358,336 live documents | 190.3 MB | green health | 1 shard 0 replicas.
+    Source: C:\Users\VediyappanMAskArgus\Desktop\mcps\Journal.log.txt
+    ingested via Python pipeline into Docker container infra-elasticsearch.
+
+    Key business columns:
+    - msg_type = ordupd (order update), login, logout
+    - TransType = B (Buy) | S (Sell)
+    - OrdStatus/ReportType are NSE FIX-protocol numeric codes
+    - All prices stored as exchange integers (divide by 10^PricePrecision for INR)
+    - ExchNsecs provides nanosecond FIFO ordering for market microstructure analysis
+
+    Dynamic fields (null in many docs): FillId, FillPrice, FillQty appear only on fill events.
+    Spread leg fields (Leg2) appear only on spread/combo orders.
+  '''
+}
+
+
+// --- Subdocument: Instrument metadata for leg 1 ---
+Table es_journal_log__Scripupdate {
+  es_doc_id         varchar   [pk, not null, note: 'FK to parent es_journal_log._id']
+  Exchange          varchar(5)  [note: 'Exchange the instrument is listed on. Observed: NSE (336,639 docs), BSE (21,050 docs). ES type: text+keyword']
+  Segment           varchar(5)  [note: 'Market segment. Observed: DER = Derivatives (334,762) | EQT = Equity (22,927). ES type: text+keyword']
+  InstrumentName    varchar(20) [note: 'Instrument category from exchange. Observed: OPTIDX=325,355 | EQ=22,098 | OPTSTK=5,973 | FUTSTK=3,288 | FUTIDX=146 | X | A | XT | BE | B. ES type: text+keyword']
+  TradingSymbol     text        [note: 'Full trading symbol. e.g. NIFTY24MAR26P22900. ES type: text+keyword']
+  SymbolName        text        [note: 'Underlying symbol (root). e.g. NIFTY, BANKNIFTY, RELIANCE. ES type: text+keyword']
+  OptionType        varchar(5)  [note: 'Option type. Observed: CE = Call (181,314) | PE = Put (150,014) | XX = Non-option (3,434). ES type: text+keyword']
+  StrikePrice       bigint      [note: 'Strike price in integer paise. e.g. 2290000 = ₹22,900.00 (for OPTIDX with precision=2). ES type: long']
+  ExpiryDate        text        [note: 'Expiry date as DD-MMM-YYYY string. e.g. 24-MAR-2026. ES type: text+keyword']
+  RedExpiryDate     text        [note: 'Expiry date in YYYYMMDD numeric format. e.g. 20260324. ES type: text+keyword']
+  ExchExpiryDate    bigint      [note: 'Expiry date as Unix epoch seconds. e.g. 1458829800. ES type: long']
+  LotSize           bigint      [note: 'Contract lot size (units per lot). e.g. 65 for NIFTY. ES type: long']
+  TickSize          bigint      [note: 'Minimum price movement in paise. e.g. 5. ES type: long']
+  PricePrecision    bigint      [note: 'Number of decimal places for price. e.g. 2 means prices are in paise (÷100 = INR). ES type: long']
+  GsmInd            bigint      [note: 'GSM (Graded Surveillance Measure) indicator from exchange. ES type: long']
+  ConProdId         text        [note: 'Contract/Product ID at exchange. ES type: text+keyword']
+  InteropExchSeg    text        [note: 'Interoperability exchange segment. ES type: text+keyword']
+  InteropKey        text        [note: 'Interoperability key. ES type: text+keyword']
+  subdoc_json       json        [note: 'Full raw JSON of this subdocument for reference.']
+
+  Note: '1:1 subdocument of es_journal_log. Contains NSE/BSE instrument reference data at the time of the order event.'
+}
+
+
+// --- Subdocument: Spread leg 1 instrument metadata ---
+Table es_journal_log__ScripupdateSpread {
+  es_doc_id                 varchar   [pk, not null, note: 'FK to parent es_journal_log._id']
+  Exchange                  varchar(5)  [note: 'Exchange. Observed: NSE | BSE. ES type: text+keyword']
+  Segment                   varchar(5)  [note: 'Market segment — DER | EQT. ES type: text+keyword']
+  InstrumentName            varchar(20) [note: 'Instrument category. ES type: text+keyword']
+  TradingSymbol             text        [note: 'Spread contract trading symbol. ES type: text+keyword']
+  SymbolName                text        [note: 'Underlying root symbol. ES type: text+keyword']
+  OptionType                varchar(5)  [note: 'Option type — CE | PE | XX. ES type: text+keyword']
+  StrikePrice               bigint      [note: 'Strike price (integer paise). ES type: long']
+  ExpiryDate                text        [note: 'Expiry DD-MMM-YYYY. ES type: text+keyword']
+  RedExpiryDate             text        [note: 'Expiry YYYYMMDD. ES type: text+keyword']
+  ExchExpiryDate            bigint      [note: 'Expiry Unix epoch seconds. ES type: long']
+  LotSize                   bigint      [note: 'Contract lot size. ES type: long']
+  TickSize                  bigint      [note: 'Minimum price tick. ES type: long']
+  SpreadTradingSymbolLeg1   text        [note: 'Trading symbol for leg 1 of the spread. ES type: text+keyword']
+  SpreadTradingSymbolLeg2   text        [note: 'Trading symbol for leg 2 of the spread. ES type: text+keyword']
+  subdoc_json               json        [note: 'Raw JSON of this subdocument.']
+
+  Note: '1:1 subdocument of es_journal_log. Populated only for spread/combo orders (ScripupdateSpread != null).'
+}
+
+
+// --- Subdocument: Leg 2 instrument metadata for spreads ---
+Table es_journal_log__scripupdateLEG2 {
+  es_doc_id       varchar   [pk, not null, note: 'FK to parent es_journal_log._id']
+  Exchange        varchar(5)  [note: 'Exchange — NSE | BSE. ES type: text+keyword']
+  Segment         varchar(5)  [note: 'Market segment — DER | EQT. ES type: text+keyword']
+  InstrumentName  varchar(20) [note: 'Instrument category. ES type: text+keyword']
+  TradingSymbol   text        [note: 'Leg 2 trading symbol. ES type: text+keyword']
+  SymbolName      text        [note: 'Underlying root symbol for leg 2. ES type: text+keyword']
+  OptionType      varchar(5)  [note: 'Option type — CE | PE | XX. ES type: text+keyword']
+  StrikePrice     bigint      [note: 'Leg 2 strike price (integer paise). ES type: long']
+  ExpiryDate      text        [note: 'Leg 2 expiry DD-MMM-YYYY. ES type: text+keyword']
+  RedExpiryDate   text        [note: 'Leg 2 expiry YYYYMMDD. ES type: text+keyword']
+  ExchExpiryDate  bigint      [note: 'Leg 2 expiry Unix epoch seconds. ES type: long']
+  LotSize         bigint      [note: 'Leg 2 lot size. ES type: long']
+  TickSize        bigint      [note: 'Leg 2 tick size. ES type: long']
+  subdoc_json     json        [note: 'Raw JSON of this subdocument.']
+
+  Note: '1:1 subdocument of es_journal_log. Populated only for spread orders with a defined leg 2.'
+}
+
+
+// --- Subdocument: Noren processing latency timestamps ---
+Table es_journal_log__TimeStamps {
+  es_doc_id          varchar  [pk, not null, note: 'FK to parent es_journal_log._id']
+  NorenOraIn         bigint   [note: 'Noren Oracle adapter — inbound timestamp (Unix epoch sec). ES type: long']
+  NorenOraInNsecs    bigint   [note: 'Nanosecond component of NorenOraIn. ES type: long']
+  NorenOraOut        bigint   [note: 'Noren Oracle adapter — outbound timestamp. ES type: long']
+  NorenOraOutNsecs   bigint   [note: 'Nanosecond component of NorenOraOut. ES type: long']
+  NorenRedIn         bigint   [note: 'Noren Redis adapter — inbound timestamp. ES type: long']
+  NorenRedInNsecs    bigint   [note: 'Nanosecond component of NorenRedIn. ES type: long']
+  NorenRedOut        bigint   [note: 'Noren Redis adapter — outbound timestamp. ES type: long']
+  NorenRedOutNsecs   bigint   [note: 'Nanosecond component of NorenRedOut. ES type: long']
+  NorenSafIn         bigint   [note: 'Noren SAF (Store-And-Forward) inbound timestamp. ES type: long']
+  NorenSafInNsecs    bigint   [note: 'Nanosecond component of NorenSafIn. ES type: long']
+  subdoc_json        json     [note: 'Raw JSON of the TimeStamps object.']
+
+  Note: '''
+    1:1 subdocument of es_journal_log.
+    Contains nanosecond-resolution component timestamps for latency profiling
+    of the Noren order processing pipeline (ORA → RED → SAF adapters).
+    Latency = NorenXxxOut - NorenXxxIn (in nanoseconds).
+  '''
+}
+
+
+// --- Subdocument: User profile snapshot (populated on login events) ---
+Table es_journal_log__Userdetails {
+  es_doc_id            varchar   [pk, not null, note: 'FK to parent es_journal_log._id']
+  UserId               text      [note: 'User ID (matches parent UserId). ES type: text+keyword']
+  UserName             text      [note: 'Full display name of the user. ES type: text+keyword']
+  EmailId              text      [note: 'User email address. ES type: text+keyword']
+  MobNum               bigint    [note: 'Mobile number (stored as long). ES type: long']
+  Dob                  text      [note: 'Date of birth as string. ES type: text+keyword']
+  BrokerId             text      [note: 'Broker ID. ES type: text+keyword']
+  AcctIds              text      [note: 'All account IDs for this user (serialised). ES type: text']
+  AcctOverview         boolean   [note: 'Account overview permission flag. ES type: boolean']
+  Products             text      [note: 'Permitted product types (serialised list). ES type: text']
+  UserOrdTypes         text      [note: 'Permitted order types. ES type: text']
+  UserAccessGrp        text      [note: 'Access control group assignment. ES type: text+keyword']
+  UserTag              text      [note: 'Custom tag assigned by broker. ES type: text+keyword']
+  UserPrivilege        bigint    [note: 'User privilege bitmask. ES type: long']
+  UserIpAddr           text      [note: 'Client IP at login time. ES type: text+keyword']
+  UserMacAddr          text      [note: 'Client MAC address at login. ES type: text+keyword']
+  UserSessId           text      [note: 'Session ID for this login. ES type: text+keyword']
+  UserSessOtp          text      [note: 'OTP used for this session (hashed/masked). ES type: text+keyword']
+  DisplayPrecision     bigint    [note: 'UI price display precision (decimal places). ES type: long']
+  MaxContractSub       bigint    [note: 'Maximum contracts allowed per submission. ES type: long']
+  LastLoginIp          text      [note: 'IP address from the previous login. ES type: text+keyword']
+  LastLoginMac         text      [note: 'MAC address from the previous login. ES type: text+keyword']
+  LastLoginTime        bigint    [note: 'Epoch timestamp of previous login. ES type: long']
+  LastPasswordTime     bigint    [note: 'Epoch timestamp of last password change. ES type: long']
+  LastAttemptCount     bigint    [note: 'Failed login attempt counter. ES type: long']
+  PasswordReset        boolean   [note: 'Whether password reset is required. ES type: boolean']
+  PropOrdFlag          boolean   [note: 'Proprietary order permission flag. ES type: boolean']
+  RedSuperUser         boolean   [note: 'Super-user (admin) flag. ES type: boolean']
+  Region               text      [note: 'User geographic region. ES type: text+keyword']
+  NorenAppVersion      text      [note: 'Noren app version at login. ES type: text+keyword']
+  UserExchDetails      json      [note: 'Exchange-level details as nested object (exchange, segment, product permissions). ES type: object']
+  subdoc_json          json      [note: 'Raw JSON of the full Userdetails object.']
+
+  Note: '''
+    1:1 subdocument of es_journal_log.
+    Populated ONLY for msg_type = login (623 docs).
+    Contains a full user profile snapshot as captured at login time.
+    UserSessOtp and UserMacAddr must be treated as PII and masked in dashboards.
+  '''
+}
+
+
+// Relationships
+Ref: es_journal_log__Scripupdate.es_doc_id > es_journal_log.es_doc_id
+Ref: es_journal_log__ScripupdateSpread.es_doc_id > es_journal_log.es_doc_id
+Ref: es_journal_log__scripupdateLEG2.es_doc_id > es_journal_log.es_doc_id
+Ref: es_journal_log__TimeStamps.es_doc_id > es_journal_log.es_doc_id
+Ref: es_journal_log__Userdetails.es_doc_id > es_journal_log.es_doc_id
+
+
+// =============================================================================
+// PROMETHEUS TSDB SECTION
+// Real metrics from: https://prometheus-fs-le-isv.AskArgus.in/
+// 427 metrics pulled live. Presented as logical relational tables.
+// =============================================================================
+
+Table prometheus_scrape_target {
+  target_id     varchar   [pk, not null, note: 'Synthetic ID: {job}_{instance}']
+  job           varchar   [not null, note: 'Scrape job name as configured in prometheus.yml. Observed: kubernetes-apiservers | kubernetes-nodes | kubernetes-cadvisor | kubernetes-service-endpoints | kube-state-metrics | SNMP-{IP} | WINDOWS_EXPORTR-{IP} | router']
+  instance      varchar   [not null, note: 'Scraped endpoint label host:port or IP. e.g. 10.10.0.101:6443, 10.10.1.170:9182, 172.20.100.1']
+  scrape_url    varchar   [note: 'Actual URL Prometheus calls for scrape. e.g. https://10.10.0.101:6443/metrics, http://prom-snmpexporter-svc.fs-linkedeye:8080/snmp?module={IP}&target={IP}']
+  health        varchar   [note: 'Target health status. Observed: up (all active) | down (router: 172.16.0.16). Values: up | down | unknown']
+  last_scrape   timestamp [note: 'Timestamp of most recent successful scrape (UTC+05:30)']
+  product_model varchar   [note: 'SNMP targets carry this label. Observed: fortigate | huawei | cisco']
+  k8s_labels    json      [note: 'Additional Kubernetes/infrastructure labels e.g. kubernetes_namespace, group, beta_kubernetes_io_arch']
+
+  Note: '''
+    Live scrape targets from Prometheus at 2026-04-13.
+    Active targets: 35+  |  Down targets: 1 (router 172.16.0.16).
+
+    Job categories:
+    - kubernetes-apiservers:          K8s API server (10.10.0.101:6443)
+    - kubernetes-nodes:               Kubelet on node fs-le-isv
+    - kubernetes-cadvisor:            Container resource metrics (cAdvisor)
+    - kubernetes-service-endpoints:   CoreDNS (x2), Prometheus self
+    - kube-state-metrics:             K8s object state (deployments, pods, etc.)
+    - SNMP-172.20.100.1:              FortiGate firewall
+    - SNMP-172.20.100.107/108:        Huawei switches
+    - SNMP-172.20.100.250:            Cisco device
+    - WINDOWS_EXPORTR-10.10.1.{x}:   11 Windows Server nodes (port 9182)
+    - router:                         Router exporter — currently DOWN
+  '''
+}
+
+Table prometheus_metric_metadata {
+  metric_name   varchar   [pk, not null, note: 'Prometheus metric name. e.g. node_cpu_seconds_total']
+  type          varchar   [not null, note: 'Metric type. Observed values: counter | gauge | histogram | summary | unknown']
+  help          text      [note: 'Human-readable description from the exporter /metrics endpoint']
+  unit          varchar   [note: 'Metric unit if declared. Usually empty string. e.g. seconds, bytes']
+  source_job    varchar   [note: 'Primary scrape job that emits this metric (logical categorisation)']
+
+  Note: '''
+    427 real metrics pulled from /api/v1/metadata at 2026-04-13.
+
+    Metric family breakdown by count:
+    - counter:   288 metrics (monotonically increasing — use rate() in PromQL)
+    - gauge:     200 metrics (instantaneous value — CPU%, memory bytes, etc.)
+    - histogram:  74 metrics (bucketed distributions — use histogram_quantile())
+    - summary:    18 metrics (quantile distributions — pre-computed)
+    - unknown:    47 metrics (node_netstat_*, node_vmstat_* — type undeclared)
+
+    Major metric families:
+    - apiserver_*          : Kubernetes API server request/admission metrics
+    - kubelet_*            : Kubelet pod/container lifecycle metrics
+    - node_*               : Linux node exporter (CPU, memory, disk, net, netstat)
+    - windows_*            : Windows exporter (CPU, memory, disk, net, services)
+    - coredns_*            : CoreDNS DNS query metrics
+    - etcd_*               : etcd key-value store performance
+    - go_*                 : Go runtime (GC, goroutines, memory)
+    - prometheus_*         : Prometheus self-monitoring (TSDB, scrape, rules)
+    - kube_*               : kube-state-metrics (pod/node/deployment states)
+    - rest_client_*        : K8s client-go HTTP request metrics
+    - workqueue_*          : K8s controller workqueue metrics
+    - authentication_*     : K8s authentication duration
+    - authorization_*      : K8s authorization duration
+    - storage_*            : K8s storage/volume operation metrics
+
+    See prometheus_key_metrics table for the most operationally important subset.
+  '''
+}
+
+Table prometheus_key_metrics {
+  metric_name   varchar   [pk, not null, note: 'Metric name']
+  type          varchar   [not null, note: 'counter | gauge | histogram | summary']
+  help          text      [note: 'Description']
+  typical_labels varchar  [note: 'Common label dimensions for this metric']
+  use_case      text      [note: 'Operational use-case / alerting purpose']
+
+  Note: '''
+    Curated subset of the 427 metrics most relevant for infrastructure alerting.
+    Full list is in prometheus_metric_metadata.
+
+    === KUBERNETES CONTROL PLANE ===
+    apiserver_request_total (counter)
+      Labels: verb, resource, code, component
+      Use: API error rate — alert if 5xx rate > threshold
+
+    apiserver_request_duration_seconds (histogram)
+      Labels: verb, resource, subresource
+      Use: API latency SLO — histogram_quantile(0.99, ...)
+
+    apiserver_current_inflight_requests (gauge)
+      Labels: request_kind (mutating/readOnly)
+      Use: Control plane saturation
+
+    etcd_request_duration_seconds (histogram)
+      Labels: operation, type
+      Use: etcd write/read latency
+
+    === KUBELET / WORKLOADS ===
+    kubelet_pod_start_sli_duration_seconds (histogram)
+      Use: Pod startup latency SLO
+
+    kubelet_runtime_operations_duration_seconds (histogram)
+      Labels: operation_type
+      Use: Container runtime (containerd) performance
+
+    kubelet_running_pods (gauge)
+      Use: Running pod count per node
+
+    container_cpu_usage_seconds_total (counter) — from cadvisor
+      Labels: namespace, pod, container
+      Use: Container CPU utilisation
+
+    container_memory_working_set_bytes (gauge) — from cadvisor
+      Labels: namespace, pod, container
+      Use: Container memory — compare to resource limits
+
+    === NODE / WINDOWS ===
+    node_cpu_seconds_total (counter)
+      Labels: cpu, mode (idle/iowait/irq/nice/softirq/steal/system/user)
+      Use: CPU utilisation = 1 - rate(node_cpu_seconds_total{mode="idle"}[5m])
+
+    node_memory_MemAvailable_bytes (gauge)
+      Use: Available memory alert
+
+    node_filesystem_avail_bytes (gauge)
+      Labels: device, fstype, mountpoint
+      Use: Disk space alert
+
+    node_network_receive_bytes_total / node_network_transmit_bytes_total (counter)
+      Labels: device
+      Use: Network throughput
+
+    windows_cpu_core_frequency_mhz (gauge)
+      windows_memory_available_bytes (gauge)
+      windows_logical_disk_free_bytes (gauge)
+      windows_net_bytes_received / _sent (counter)
+      Use: Windows server resource monitoring for 11 nodes
+
+    === PROMETHEUS SELF ===
+    prometheus_tsdb_head_samples_appended_total (counter)
+      Use: Ingestion rate — samples/sec
+
+    prometheus_target_scrape_duration_seconds (gauge)
+      Use: Slow scrapes alert
+
+    prometheus_rule_evaluation_failures_total (counter)
+      Use: Alerting rule breakage detection
+
+    === DNS ===
+    coredns_dns_request_duration_seconds (histogram)
+      Labels: server, zone, proto, type
+      Use: DNS latency SLO
+
+    coredns_dns_responses_total (counter)
+      Labels: rcode
+      Use: DNS error rate (SERVFAIL/NXDOMAIN)
+  '''
+}
+
+Table prometheus_series {
+  series_id     varchar   [pk, not null, note: 'Synthetic ID: {metric_name}_{labels_hash}']
+  metric_name   varchar   [not null, note: 'Metric name — FK to prometheus_metric_metadata']
+  labels_json   json      [not null, note: 'Full label-set as JSON. e.g. {"job":"kubernetes-nodes","instance":"fs-le-isv","namespace":"kube-system"}']
+  Note: 'One row per unique metric + label-set combination. Prometheus stores each as an independent time series.'
+}
+
+Table prometheus_sample {
+  series_id   varchar   [not null, note: 'FK to prometheus_series.series_id']
+  ts          timestamp [not null, note: 'Sample timestamp (UTC)']
+  value       double    [not null, note: 'Sample value as 64-bit float. Integers are exact; special: +Inf, -Inf, NaN']
+  Note: 'Individual time-stamped samples. Prometheus default retention = 15 days. Stored in TSDB chunks on disk, not queryable as rows.'
+}
+
+// TSDB relationships
+Ref: prometheus_series.metric_name > prometheus_metric_metadata.metric_name
+Ref: prometheus_sample.series_id > prometheus_series.series_id
+Ref: prometheus_metric_metadata.source_job > prometheus_scrape_target.job

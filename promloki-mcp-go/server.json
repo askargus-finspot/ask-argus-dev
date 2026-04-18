@@ -1,0 +1,43 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "local/promloki-mcp-go",
+  "title": "Prometheus Loki MCP (Go)",
+  "description": "MCP server for Prometheus metrics and Loki logs, implemented in Go.",
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "oci",
+      "identifier": "local/promloki-mcp-go:0.1.0",
+      "transport": {
+        "type": "streamable-http",
+        "url": "http://{host}:{port}/mcp"
+      },
+      "runtimeArguments": [
+        {
+          "type": "named",
+          "name": "--address",
+          "value": "{host}",
+          "variables": {
+            "host": {
+              "description": "bind host",
+              "isRequired": true,
+              "default": "127.0.0.1"
+            }
+          }
+        },
+        {
+          "type": "named",
+          "name": "--port",
+          "value": "{port}",
+          "variables": {
+            "port": {
+              "description": "bind port",
+              "isRequired": true,
+              "default": "8080"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

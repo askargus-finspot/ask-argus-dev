@@ -1,0 +1,37 @@
+# AskArgus MCP-Only Configuration
+# This file is mapped as the primary configuration to show the 7 databases
+
+version: 1.0.0
+
+mcpSettings:
+  allowedDomains:
+    - 'host.docker.internal'
+    - 'localhost'
+
+mcpServers:
+  postgres:
+    type: sse
+    title: PostgreSQL Server
+    url: http://mcp-pg:5000/mcp
+  mysql:
+    type: sse
+    title: MySQL Server
+    url: http://mcp-mysql:5000/mcp
+  neo4j:
+    type: sse
+    title: Neo4j Server
+    url: http://mcp-neo4j:5000/mcp
+  elasticsearch:
+    type: sse
+    title: Elasticsearch Server
+    url: http://mcp-es:5000/mcp
+  rabbitmq:
+    type: sse
+    title: RabbitMQ Server
+    url: http://mcp-rmq:5000/mcp
+  observability:
+    type: sse
+    title: Prometheus & Loki Server
+    url: http://mcp-obs:8080/sse
+    headers:
+      Authorization: "Bearer dev_token_123"

@@ -1,0 +1,57 @@
+flowchart LR
+  user["User / Browser"]
+
+  subgraph app["AskArgus Application Stack"]
+    ui["AskArgus Chat UI\ncontainer: AskArgus-ai-ui\nport: 3081"]
+    api["Backend Agent API\n/api/agents/chat/:endpoint"]
+    pg[("PostgreSQL DB\nusers, chats, messages, API keys, run metadata")]
+    config["Config + Policy Loader\nAskArgus-ai.yaml\nendpoints, MCP servers, allowed domains"]
+
+    subgraph graph["LangGraph Agent Runtime\nUSED HERE"]
+      run["Agent Run Builder\ncreates request context"]
+      runtime["Agent Runtime Nodes\nplanning, model calls, tool steps"]
+      decision["Reasoning + Tool Decision Loop\nmodel -> tool -> model"]
+      metadata["Usage + Streaming\ninput/output tokens, tool count, latency"]
+    end
+
+    mcpClient["MCP Client / Tool Router\nloads available MCP tools\nroutes calls and results"]
+  end
+
+  subgraph providers["LLM Providers"]
+    nvidia["NVIDIA Endpoint\nKimi, Qwen, DeepSeek, Llama"]
+    other["Other Endpoints\nOpenRouter, Groq, Mistral, Local LLM"]
+  end
+
+  subgraph tools["MCP Tool Servers"]
+    promMcp["Prometheus MCP Server\nhealth_check, execute_query,\nlist_metrics, get_targets"]
+    esMcp["Elasticsearch MCP Server\nlist_indices, get_mappings,\nsearch, ESQL, shards"]
+  end
+
+  subgraph data["Observability Data Sources"]
+    prom[("Prometheus TSDB\nmetrics, series, samples, targets")]
+    es[("Elasticsearch / ELK\njournal-log index, mappings, search results")]
+  end
+
+  user -->|"chat message"| ui
+  ui -->|"HTTP request"| api
+  api <--> pg
+  api --> config
+  api --> run
+  config --> mcpClient
+  run --> runtime
+  runtime --> decision
+  decision -->|"LLM request"| nvidia
+  decision -->|"optional LLM request"| other
+  decision -->|"MCP tool call"| mcpClient
+  mcpClient -->|"Prometheus tools"| promMcp
+  mcpClient -->|"Elasticsearch tools"| esMcp
+  promMcp -->|"PromQL / metadata"| prom
+  esMcp -->|"search / mappings / ESQL"| es
+  prom -->|"tool result"| promMcp
+  es -->|"tool result"| esMcp
+  promMcp --> mcpClient
+  esMcp --> mcpClient
+  mcpClient --> decision
+  decision --> metadata
+  metadata -->|"SSE chunks, tool steps, final answer"| ui
+  metadata -->|"store usage and message state"| pg

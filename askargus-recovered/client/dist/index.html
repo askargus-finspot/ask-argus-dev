@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <base href="/" />
+    <meta name="theme-color" content="#171717" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="description" content="AskArgus - Advanced AI chat platform with multiple AI models" />
+    <title>AskArgus</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png" />
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon-180x180.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+    </style>
+    <script>
+      const theme = localStorage.getItem('color-theme');
+      const loadingContainerStyle = document.createElement('style');
+      let backgroundColor;
+
+      if (theme === 'dark') {
+        backgroundColor = '#0d0d0d';
+      } else if (theme === 'light') {
+        backgroundColor = '#ffffff';
+      } else if (theme === 'system') {
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        backgroundColor = prefersDarkScheme ? '#0d0d0d' : '#ffffff';
+      } else {
+        backgroundColor = '#ffffff';
+      }
+
+      loadingContainerStyle.innerHTML = `
+        #loading-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          background-color: ${backgroundColor};
+        }
+      `;
+      document.head.appendChild(loadingContainerStyle);
+    </script>
+    <script type="module" crossorigin src="./assets/validation.CV7tPVAW.js"></script>
+    <script type="module" crossorigin src="./assets/math-katex.Bw_N0rIA.js"></script>
+    <script type="module" crossorigin src="./assets/vendor.DZJiDULA.js"></script>
+    <script type="module" crossorigin src="./assets/i18n.CSc5boDR.js"></script>
+    <script type="module" crossorigin src="./assets/locales.DC0rE-Ut.js"></script>
+    <script type="module" crossorigin src="./assets/routing.6JnYc7PA.js"></script>
+    <script type="module" crossorigin src="./assets/radix-ui.CyEfiCiK.js"></script>
+    <script type="module" crossorigin src="./assets/react-interactions.uTjMk92h.js"></script>
+    <script type="module" crossorigin src="./assets/tanstack-vendor.BW6DJZNm.js"></script>
+    <script type="module" crossorigin src="./assets/avatars.B-PntWQn.js"></script>
+    <script type="module" crossorigin src="./assets/advanced-inputs.Afqw7_zm.js"></script>
+    <script type="module" crossorigin src="./assets/virtualization.BRj7IiCK.js"></script>
+    <script type="module" crossorigin src="./assets/animations.BjWJPnKk.js"></script>
+    <script type="module" crossorigin src="./assets/headlessui.BvNznqGS.js"></script>
+    <script type="module" crossorigin src="./assets/framer-motion.M01q9ojE.js"></script>
+    <script type="module" crossorigin src="./assets/http-client.D3jSkS1h.js"></script>
+    <script type="module" crossorigin src="./assets/utilities.Ca5AB_YX.js"></script>
+    <script type="module" crossorigin src="./assets/date-utils.ejIRoDC8.js"></script>
+    <script type="module" crossorigin src="./assets/codemirror-state.C8nmO8dc.js"></script>
+    <script type="module" crossorigin src="./assets/codemirror-view.Dhl9ABWs.js"></script>
+    <script type="module" crossorigin src="./assets/codemirror-language.DNAXIhDr.js"></script>
+    <script type="module" crossorigin src="./assets/codemirror-core.BYf6avQu.js"></script>
+    <script type="module" crossorigin src="./assets/sandpack.Dkvyr7Tj.js"></script>
+    <script type="module" crossorigin src="./assets/forms.VwvnTpIY.js"></script>
+    <script type="module" crossorigin src="./assets/markdown_highlight.CzVjGFYz.js"></script>
+    <script type="module" crossorigin src="./assets/markdown-processing.DQGvZD27.js"></script>
+    <script type="module" crossorigin src="./assets/security-ui.DLP2UxO7.js"></script>
+    <script type="module" crossorigin src="./assets/code-editor.5DqskR7A.js"></script>
+    <script type="module" crossorigin src="./assets/heic-converter.Cz_Prg7D.js"></script>
+    <script type="module" crossorigin src="./assets/index.Bw47U2oo.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/math-katex.shCdvSET.css">
+    <link rel="stylesheet" crossorigin href="./assets/index.rDcWQE1u.css">
+  <link rel="manifest" href="./manifest.webmanifest" crossorigin="use-credentials"><script id="vite-plugin-pwa:register-sw" src="./registerSW.js"></script></head>
+  <body>
+    <div id="root">
+      <div id="loading-container"></div>
+    </div>
+  </body>
+</html>

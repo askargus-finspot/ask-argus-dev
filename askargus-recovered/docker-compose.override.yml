@@ -1,0 +1,14 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_MAX_OLD_SPACE_SIZE: 6144
+    image: AskArgus-ai:latest
+    container_name: AskArgus-AI
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/AskArgus
+    extra_hosts:
+      - "llm-server:172.16.0.65"
+    # Note: askargus.yaml mount removed - use askargus-ui.yaml with askargus-compose.yaml instead
