@@ -1,0 +1,173 @@
+# AskArgus Configuration for askargus-recovered
+# Version: 1.3.7
+
+version: 1.3.7
+
+# Cache settings
+cache: true
+
+# Custom interface configuration
+interface:
+  modelSelect: true
+  parameters: true
+  presets: true
+  bookmarks: true
+  multiConvo: true
+  
+  prompts:
+    use: true
+    create: true
+    share: false
+    public: false
+  
+  agents:
+    use: true
+    create: true
+    share: false
+    public: false
+  
+  peoplePicker:
+    users: true
+    groups: true
+    roles: true
+  
+  fileSearch: false
+  fileCitations: false
+
+# Registration settings
+registration:
+  socialLogins: []
+
+# Agent Actions domain restrictions
+actions:
+  allowedDomains:
+    - '*'
+
+# MCP Server domain restrictions
+mcpSettings:
+  allowedDomains:
+    - 'host.docker.internal'
+    - 'localhost'
+
+# MCP Servers configuration
+mcpServers:
+  postgres:
+    type: sse
+    title: PostgreSQL Server
+    url: http://host.docker.internal:5000/mcp/sse
+  mysql:
+    type: sse
+    title: MySQL Server
+    url: http://host.docker.internal:5001/mcp/sse
+  elasticsearch:
+    type: sse
+    title: Elasticsearch Server
+    url: http://host.docker.internal:5002/mcp/sse
+
+# Definition of custom endpoints
+endpoints:
+  custom:
+    # OpenRouter Configuration
+    - name: 'OpenRouter'
+      apiKey: 'user_provided'
+      baseURL: 'https://openrouter.ai/api/v1'
+      models:
+        default:
+          - 'google/gemini-2.0-flash-exp:free'
+          - 'google/gemini-flash-1.5-exp:free'
+          - 'meta-llama/llama-3.2-3b-instruct:free'
+          - 'meta-llama/llama-3.1-8b-instruct:free'
+          - 'microsoft/phi-3-mini-128k-instruct:free'
+          - 'anthropic/claude-3.5-sonnet'
+          - 'openai/gpt-4o'
+          - 'openai/gpt-4o-mini'
+        fetch: true
+      titleConvo: false
+      titleModel: 'google/gemini-2.0-flash-exp:free'
+      modelDisplayLabel: 'OpenRouter'
+      maxContextTokens: 8192
+      max_tokens: 4096
+
+    # Groq Configuration
+    - name: 'Groq'
+      apiKey: 'user_provided'
+      baseURL: 'https://api.groq.com/openai/v1/'
+      models:
+        default:
+          - 'llama-3.3-70b-versatile'
+          - 'llama-3.1-70b-versatile'
+          - 'mixtral-8x7b-32768'
+          - 'gemma2-9b-it'
+        fetch: false
+      titleConvo: false
+      titleModel: 'llama-3.3-70b-versatile'
+      modelDisplayLabel: 'Groq'
+
+    # OpenAI Configuration
+    - name: 'OpenAI'
+      apiKey: 'user_provided'
+      baseURL: 'https://api.openai.com/v1'
+      models:
+        default:
+          - 'gpt-4o'
+          - 'gpt-4o-mini'
+          - 'gpt-4-turbo'
+          - 'gpt-3.5-turbo'
+        fetch: true
+      titleConvo: false
+      titleModel: 'gpt-4o-mini'
+      modelDisplayLabel: 'OpenAI'
+
+    # Grok Configuration
+    - name: 'Grok'
+      apiKey: 'user_provided'
+      baseURL: 'https://api.x.ai/v1'
+      models:
+        default:
+          - 'grok-beta'
+          - 'grok-vision-beta'
+        fetch: true
+      titleConvo: false
+      titleModel: 'grok-beta'
+      modelDisplayLabel: 'Grok'
+
+    # NVIDIA NIM Configuration
+    - name: 'NVIDIA'
+      apiKey: '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'
+      baseURL: 'https://integrate.api.nvidia.com/v1'
+      models:
+        default:
+          # Meta Llama Models
+          - 'meta/llama-3.1-405b-instruct'
+          - 'meta/llama-3.1-70b-instruct'
+          - 'meta/llama-3.1-8b-instruct'
+          - 'meta/llama3-70b-instruct'
+          # Microsoft Models
+          - 'microsoft/phi-3-medium-128k-instruct'
+          - 'microsoft/phi-3-mini-128k-instruct'
+          - 'microsoft/phi-3-small-128k-instruct'
+          # Mistral Models
+          - 'mistralai/mistral-large-2-instruct'
+          - 'mistralai/mixtral-8x7b-instruct-v0.1'
+          - 'mistralai/mixtral-8x22b-instruct-v0.1'
+          # Google Models
+          - 'google/gemma-2-27b-it'
+          - 'google/gemma-2-9b-it'
+          - 'google/gemma-7b'
+          # IBM Granite Models
+          - 'ibm/granite-34b-code-instruct'
+          - 'ibm/granite-8b-code-instruct'
+          # Snowflake Arctic
+          - 'snowflake/arctic'
+          # NVIDIA Nemotron
+          - 'nvidia/nemotron-4-340b-instruct'
+          # Databricks DBRX
+          - 'databricks/dbrx-instruct'
+          # Upstage Solar
+          - 'upstage/solar-10.7b-instruct'
+        fetch: true
+      titleConvo: false
+      titleModel: 'meta/llama-3.1-70b-instruct'
+      modelDisplayLabel: 'NVIDIA'
+      dropParams: ['stop', 'frequency_penalty', 'presence_penalty']
+      iconURL: 'https://www.nvidia.com/favicon.ico'

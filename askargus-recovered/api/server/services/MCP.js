@@ -5,7 +5,7 @@ const {
   StepTypes,
   GraphEvents,
   Constants: AgentConstants,
-} = require('@askargus/agents');
+} = require('@vediyappanm05/agents');
 const {
   sendEvent,
   MCPOAuthHandler,
@@ -179,7 +179,7 @@ function createRunStepDeltaEmitter({ res, stepId, toolCall, streamId = null }) {
  */
 function createRunStepEmitter({ res, runId, stepId, toolCall, index, streamId = null }) {
   return async function () {
-    /** @type {import('@askargus/agents').RunStep} */
+    /** @type {import('@vediyappanm05/agents').RunStep} */
     const data = {
       runId: runId ?? Constants.USE_PRELIM_RESPONSE_MESSAGE_ID,
       id: stepId,

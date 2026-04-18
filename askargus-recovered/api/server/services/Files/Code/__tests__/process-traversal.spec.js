@@ -4,7 +4,7 @@ jest.mock('@askargus/data-schemas', () => ({
   logger: { warn: jest.fn(), debug: jest.fn(), error: jest.fn() },
 }));
 
-jest.mock('@askargus/agents', () => ({
+jest.mock('@vediyappanm05/agents', () => ({
   getCodeBaseURL: jest.fn(() => 'http://localhost:8000'),
 }));
 

@@ -7,7 +7,7 @@ const {
   GraphEvents,
   GraphNodeKeys,
   ToolEndHandler,
-} = require('@askargus/agents');
+} = require('@vediyappanm05/agents');
 const {
   sendEvent,
   GenerationJobManager,

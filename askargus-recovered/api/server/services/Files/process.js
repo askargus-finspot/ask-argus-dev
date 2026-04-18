@@ -18,7 +18,7 @@ const {
   getEndpointFileConfig,
   documentParserMimeTypes,
 } = require('askargus-data-provider');
-const { EnvVar } = require('@askargus/agents');
+const { EnvVar } = require('@vediyappanm05/agents');
 const { logger } = require('@askargus/data-schemas');
 const { sanitizeFilename, parseText, processAudioFile } = require('@askargus/api');
 const {

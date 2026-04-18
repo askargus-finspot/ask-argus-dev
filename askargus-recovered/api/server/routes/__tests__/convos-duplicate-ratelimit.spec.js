@@ -3,7 +3,7 @@ const request = require('supertest');
 
 const MOCKS = '../__test-utils__/convos-route-mocks';
 
-jest.mock('@askargus/agents', () => require(MOCKS).agents());
+jest.mock('@vediyappanm05/agents', () => require(MOCKS).agents());
 jest.mock('@askargus/api', () => require(MOCKS).api({ limiterCache: jest.fn(() => undefined) }));
 jest.mock('@askargus/data-schemas', () => require(MOCKS).dataSchemas());
 jest.mock('askargus-data-provider', () =>

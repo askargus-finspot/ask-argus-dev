@@ -1,6 +1,6 @@
 const fs = require('fs').promises;
 const express = require('express');
-const { EnvVar } = require('@askargus/agents');
+const { EnvVar } = require('@vediyappanm05/agents');
 const { logger, SystemCapabilities } = require('@askargus/data-schemas');
 const {
   refreshS3FileUrls,

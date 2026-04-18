@@ -15,8 +15,8 @@ jest.mock('@askargus/data-schemas', () => ({
   },
 }));
 
-jest.mock('@askargus/agents', () => ({
-  ...jest.requireActual('@askargus/agents'),
+jest.mock('@vediyappanm05/agents', () => ({
+  ...jest.requireActual('@vediyappanm05/agents'),
   getMessageId: jest.fn(),
   ToolEndHandler: jest.fn(),
   handleToolCalls: jest.fn(),

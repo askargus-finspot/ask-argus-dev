@@ -1,5 +1,5 @@
 const { logger } = require('@askargus/data-schemas');
-const { createContentAggregator } = require('@askargus/agents');
+const { createContentAggregator } = require('@vediyappanm05/agents');
 const {
   initializeAgent,
   validateAgentModel,
@@ -50,9 +50,9 @@ function createToolLoader(signal, streamId = null, definitionsOnly = false) {
    * @returns {Promise<{
    *   tools?: StructuredTool[],
    *   toolContextMap: Record<string, unknown>,
-   *   toolDefinitions?: import('@askargus/agents').LCTool[],
+   *   toolDefinitions?: import('@vediyappanm05/agents').LCTool[],
    *   userMCPAuthMap?: Record<string, Record<string, string>>,
-   *   toolRegistry?: import('@askargus/agents').LCToolRegistry
+   *   toolRegistry?: import('@vediyappanm05/agents').LCToolRegistry
    * } | undefined>}
    */
   return async function loadTools({
@@ -113,7 +113,7 @@ const initializeClient = async ({ req, res, signal, endpointOption }) => {
    *   userMCPAuthMap?: Record<string, Record<string, string>>,
    *   agent?: object,
    *   tool_resources?: object,
-   *   toolRegistry?: import('@askargus/agents').LCToolRegistry,
+   *   toolRegistry?: import('@vediyappanm05/agents').LCToolRegistry,
    *   openAIApiKey?: string
    * }>}
    */

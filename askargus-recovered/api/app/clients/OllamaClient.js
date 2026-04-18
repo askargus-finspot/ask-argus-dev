@@ -1,7 +1,7 @@
 const { z } = require('zod');
 const axios = require('axios');
 const { Ollama } = require('ollama');
-const { sleep } = require('@askargus/agents');
+const { sleep } = require('@vediyappanm05/agents');
 const { logger } = require('@askargus/data-schemas');
 const { Constants } = require('askargus-data-provider');
 const { resolveHeaders, deriveBaseURL } = require('@askargus/api');

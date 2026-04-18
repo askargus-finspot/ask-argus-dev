@@ -4,7 +4,7 @@ const {
   Calculator,
   createSearchTool,
   createCodeExecutionTool,
-} = require('@askargus/agents');
+} = require('@vediyappanm05/agents');
 const {
   checkAccess,
   toolkitParent,

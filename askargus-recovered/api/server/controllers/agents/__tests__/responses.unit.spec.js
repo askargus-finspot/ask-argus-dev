@@ -27,7 +27,7 @@ jest.mock('@askargus/data-schemas', () => ({
   },
 }));
 
-jest.mock('@askargus/agents', () => ({
+jest.mock('@vediyappanm05/agents', () => ({
   Callback: { TOOL_ERROR: 'TOOL_ERROR' },
   ToolEndHandler: jest.fn(),
   formatAgentMessages: jest.fn().mockReturnValue({

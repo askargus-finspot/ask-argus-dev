@@ -1,5 +1,5 @@
 const { klona } = require('klona');
-const { sleep } = require('@askargus/agents');
+const { sleep } = require('@vediyappanm05/agents');
 const { sendEvent } = require('@askargus/api');
 const { logger } = require('@askargus/data-schemas');
 const {

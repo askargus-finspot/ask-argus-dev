@@ -40,8 +40,8 @@ jest.mock('~/models', () => ({
 
 const { getConvo, saveConvo, saveMessage } = require('~/models');
 
-jest.mock('@askargus/agents', () => {
-  const actual = jest.requireActual('@askargus/agents');
+jest.mock('@vediyappanm05/agents', () => {
+  const actual = jest.requireActual('@vediyappanm05/agents');
   return {
     ...actual,
     ChatOpenAI: jest.fn().mockImplementation(() => {

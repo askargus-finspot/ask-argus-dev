@@ -8,7 +8,7 @@ const {
   createToolSearch,
   Constants: AgentConstants,
   createProgrammaticToolCallingTool,
-} = require('@askargus/agents');
+} = require('@vediyappanm05/agents');
 const {
   sendEvent,
   getToolkitKey,

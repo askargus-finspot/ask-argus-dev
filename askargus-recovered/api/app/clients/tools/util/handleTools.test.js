@@ -30,7 +30,7 @@ jest.mock('~/server/services/Config', () => ({
   }),
 }));
 
-const { Calculator } = require('@askargus/agents');
+const { Calculator } = require('@vediyappanm05/agents');
 
 const { User } = require('~/db/models');
 const PluginService = require('~/server/services/PluginService');

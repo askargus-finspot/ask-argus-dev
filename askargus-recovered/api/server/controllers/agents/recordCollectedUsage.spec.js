@@ -39,8 +39,8 @@ jest.mock('~/config', () => ({
   })),
 }));
 
-jest.mock('@askargus/agents', () => ({
-  ...jest.requireActual('@askargus/agents'),
+jest.mock('@vediyappanm05/agents', () => ({
+  ...jest.requireActual('@vediyappanm05/agents'),
   createMetadataAggregator: () => ({
     handleLLMEnd: jest.fn(),
     collected: [],

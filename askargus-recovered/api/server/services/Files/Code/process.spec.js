@@ -62,7 +62,7 @@ jest.mock('@askargus/data-schemas', () => ({
   },
 }));
 
-jest.mock('@askargus/agents', () => ({
+jest.mock('@vediyappanm05/agents', () => ({
   getCodeBaseURL: jest.fn(() => 'https://code-api.example.com'),
 }));
 

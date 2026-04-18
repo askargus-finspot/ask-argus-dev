@@ -1,9 +1,9 @@
-const { Providers } = require('@askargus/agents');
+const { Providers } = require('@vediyappanm05/agents');
 const { Constants, EModelEndpoint } = require('askargus-data-provider');
 const AgentClient = require('./client');
 
-jest.mock('@askargus/agents', () => ({
-  ...jest.requireActual('@askargus/agents'),
+jest.mock('@vediyappanm05/agents', () => ({
+  ...jest.requireActual('@vediyappanm05/agents'),
   createMetadataAggregator: () => ({
     handleLLMEnd: jest.fn(),
     collected: [],

@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { nanoid } = require('nanoid');
 const { tool } = require('@langchain/core/tools');
-const { GraphEvents, sleep } = require('@askargus/agents');
+const { GraphEvents, sleep } = require('@vediyappanm05/agents');
 const { logger, encryptV2, decryptV2 } = require('@askargus/data-schemas');
 const {
   sendEvent,

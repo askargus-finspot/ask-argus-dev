@@ -1,6 +1,6 @@
 const multer = require('multer');
 const express = require('express');
-const { sleep } = require('@askargus/agents');
+const { sleep } = require('@vediyappanm05/agents');
 const { isEnabled, resolveImportMaxFileSize } = require('@askargus/api');
 const { logger } = require('@askargus/data-schemas');
 const { CacheKeys, EModelEndpoint } = require('askargus-data-provider');

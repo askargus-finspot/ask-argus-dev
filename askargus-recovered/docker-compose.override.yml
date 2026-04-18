@@ -1,10 +1,5 @@
 services:
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        NODE_MAX_OLD_SPACE_SIZE: 6144
     image: AskArgus-ai:latest
     container_name: AskArgus-AI
     environment:

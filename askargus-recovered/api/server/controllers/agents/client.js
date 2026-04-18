@@ -36,7 +36,7 @@ const {
   formatMessage,
   formatAgentMessages,
   createMetadataAggregator,
-} = require('@askargus/agents');
+} = require('@vediyappanm05/agents');
 const {
   Constants,
   Permissions,
@@ -965,7 +965,7 @@ class AgentClient extends BaseClient {
     const appConfig = req.config;
     let endpoint = agent.endpoint;
 
-    /** @type {import('@askargus/agents').ClientOptions} */
+    /** @type {import('@vediyappanm05/agents').ClientOptions} */
     let clientOptions = {
       model: agent.model || agent.model_parameters.model,
     };
@@ -1040,7 +1040,7 @@ class AgentClient extends BaseClient {
       provider = Providers.AZURE;
     }
 
-    /** @type {import('@askargus/agents').ClientOptions} */
+    /** @type {import('@vediyappanm05/agents').ClientOptions} */
     clientOptions = { ...options.llmConfig };
     if (options.configOptions) {
       clientOptions.configuration = options.configOptions;

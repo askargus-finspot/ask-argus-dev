@@ -1,5 +1,5 @@
 const { nanoid } = require('nanoid');
-const { EnvVar } = require('@askargus/agents');
+const { EnvVar } = require('@vediyappanm05/agents');
 const { logger } = require('@askargus/data-schemas');
 const { checkAccess, loadWebSearchAuth } = require('@askargus/api');
 const {

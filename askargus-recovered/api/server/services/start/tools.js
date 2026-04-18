@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { Tool } = require('@langchain/core/tools');
-const { Calculator } = require('@askargus/agents');
+const { Calculator } = require('@vediyappanm05/agents');
 const { logger } = require('@askargus/data-schemas');
 const { zodToJsonSchema } = require('zod-to-json-schema');
 const { Tools, ImageVisionTool } = require('askargus-data-provider');

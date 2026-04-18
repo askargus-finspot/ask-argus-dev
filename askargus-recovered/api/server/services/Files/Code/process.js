@@ -1,7 +1,7 @@
 const path = require('path');
 const { v4 } = require('uuid');
 const { logger } = require('@askargus/data-schemas');
-const { getCodeBaseURL } = require('@askargus/agents');
+const { getCodeBaseURL } = require('@vediyappanm05/agents');
 const {
   getBasePath,
   logAxiosError,

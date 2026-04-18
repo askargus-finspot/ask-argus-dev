@@ -1,4 +1,4 @@
-const { sleep } = require('@askargus/agents');
+const { sleep } = require('@vediyappanm05/agents');
 const { logger } = require('@askargus/data-schemas');
 const { RunStatus, defaultOrderQuery, CacheKeys } = require('askargus-data-provider');
 const getLogStores = require('~/cache/getLogStores');

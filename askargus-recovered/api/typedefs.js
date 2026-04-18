@@ -48,115 +48,115 @@
 
 /**
  * @exports Graph
- * @typedef {import('@askargus/agents').Graph} Graph
+ * @typedef {import('@vediyappanm05/agents').Graph} Graph
  * @memberof typedefs
  */
 
 /**
  * @exports StandardGraph
- * @typedef {import('@askargus/agents').StandardGraph} StandardGraph
+ * @typedef {import('@vediyappanm05/agents').StandardGraph} StandardGraph
  * @memberof typedefs
  */
 
 /**
  * @exports MessageContentComplex
- * @typedef {import('@askargus/agents').MessageContentComplex} MessageContentComplex
+ * @typedef {import('@vediyappanm05/agents').MessageContentComplex} MessageContentComplex
  * @memberof typedefs
  */
 
 /**
  * @exports EventHandler
- * @typedef {import('@askargus/agents').EventHandler} EventHandler
+ * @typedef {import('@vediyappanm05/agents').EventHandler} EventHandler
  * @memberof typedefs
  */
 
 /**
  * @exports ModelEndData
- * @typedef {import('@askargus/agents').ModelEndData} ModelEndData
+ * @typedef {import('@vediyappanm05/agents').ModelEndData} ModelEndData
  * @memberof typedefs
  */
 
 /**
  * @exports ToolEndData
- * @typedef {import('@askargus/agents').ToolEndData} ToolEndData
+ * @typedef {import('@vediyappanm05/agents').ToolEndData} ToolEndData
  * @memberof typedefs
  */
 
 /**
  * @exports ToolEndCallback
- * @typedef {import('@askargus/agents').ToolEndCallback} ToolEndCallback
+ * @typedef {import('@vediyappanm05/agents').ToolEndCallback} ToolEndCallback
  * @memberof typedefs
  */
 
 /**
  * @exports ChatModelStreamHandler
- * @typedef {import('@askargus/agents').ChatModelStreamHandler} ChatModelStreamHandler
+ * @typedef {import('@vediyappanm05/agents').ChatModelStreamHandler} ChatModelStreamHandler
  * @memberof typedefs
  */
 
 /**
  * @exports ContentAggregator
- * @typedef {import('@askargus/agents').ContentAggregatorResult['aggregateContent']} ContentAggregator
+ * @typedef {import('@vediyappanm05/agents').ContentAggregatorResult['aggregateContent']} ContentAggregator
  * @memberof typedefs
  */
 
 /**
  * @exports GraphEvents
- * @typedef {import('@askargus/agents').GraphEvents} GraphEvents
+ * @typedef {import('@vediyappanm05/agents').GraphEvents} GraphEvents
  * @memberof typedefs
  */
 
 /**
  * @exports AgentRun
- * @typedef {import('@askargus/agents').Run} AgentRun
+ * @typedef {import('@vediyappanm05/agents').Run} AgentRun
  * @memberof typedefs
  */
 
 /**
  * @exports IState
- * @typedef {import('@askargus/agents').IState} IState
+ * @typedef {import('@vediyappanm05/agents').IState} IState
  * @memberof typedefs
  */
 
 /**
  * @exports ClientCallbacks
- * @typedef {import('@askargus/agents').ClientCallbacks} ClientCallbacks
+ * @typedef {import('@vediyappanm05/agents').ClientCallbacks} ClientCallbacks
  * @memberof typedefs
  */
 
 /**
  * @exports OpenAIClientOptions
- * @typedef {import('@askargus/agents').OpenAIClientOptions} OpenAIClientOptions
+ * @typedef {import('@vediyappanm05/agents').OpenAIClientOptions} OpenAIClientOptions
  * @memberof typedefs
  */
 
 /**
  * @exports AnthropicClientOptions
- * @typedef {import('@askargus/agents').AnthropicClientOptions} AnthropicClientOptions
+ * @typedef {import('@vediyappanm05/agents').AnthropicClientOptions} AnthropicClientOptions
  * @memberof typedefs
  */
 
 /**
  * @exports BedrockClientOptions
- * @typedef {import('@askargus/agents').BedrockConverseClientOptions} BedrockClientOptions
+ * @typedef {import('@vediyappanm05/agents').BedrockConverseClientOptions} BedrockClientOptions
  * @memberof typedefs
  */
 
 /**
  * @exports VertexAIClientOptions
- * @typedef {import('@askargus/agents').VertexAIClientOptions} VertexAIClientOptions
+ * @typedef {import('@vediyappanm05/agents').VertexAIClientOptions} VertexAIClientOptions
  * @memberof typedefs
  */
 
 /**
  * @exports GoogleClientOptions
- * @typedef {import('@askargus/agents').GoogleClientOptions} GoogleClientOptions
+ * @typedef {import('@vediyappanm05/agents').GoogleClientOptions} GoogleClientOptions
  * @memberof typedefs
  */
 
 /**
  * @exports StreamEventData
- * @typedef {import('@askargus/agents').StreamEventData} StreamEventData
+ * @typedef {import('@vediyappanm05/agents').StreamEventData} StreamEventData
  * @memberof typedefs
  */
 
@@ -489,13 +489,13 @@
 
 /**
  * @exports SearchResult
- * @typedef {import('@askargus/agents').SearchResult} SearchResult
+ * @typedef {import('@vediyappanm05/agents').SearchResult} SearchResult
  * @memberof typedefs
  */
 
 /**
  * @exports SearchResultData
- * @typedef {import('@askargus/agents').SearchResultData} SearchResultData
+ * @typedef {import('@vediyappanm05/agents').SearchResultData} SearchResultData
  * @memberof typedefs
  */
 

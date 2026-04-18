@@ -1,5 +1,5 @@
 const FormData = require('form-data');
-const { getCodeBaseURL } = require('@askargus/agents');
+const { getCodeBaseURL } = require('@vediyappanm05/agents');
 const {
   logAxiosError,
   createAxiosInstance,

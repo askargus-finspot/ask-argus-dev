@@ -5,7 +5,7 @@ const { Readable } = require('stream');
 const mockAxios = jest.fn();
 mockAxios.post = jest.fn();
 
-jest.mock('@askargus/agents', () => ({
+jest.mock('@vediyappanm05/agents', () => ({
   getCodeBaseURL: jest.fn(() => 'https://code-api.example.com'),
 }));
 

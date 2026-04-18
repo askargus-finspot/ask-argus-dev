@@ -10,8 +10,8 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const mockInitializeAgent = jest.fn();
 const mockValidateAgentModel = jest.fn();
 
-jest.mock('@askargus/agents', () => ({
-  ...jest.requireActual('@askargus/agents'),
+jest.mock('@vediyappanm05/agents', () => ({
+  ...jest.requireActual('@vediyappanm05/agents'),
   createContentAggregator: jest.fn(() => ({
     contentParts: [],
     aggregateContent: jest.fn(),

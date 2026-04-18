@@ -1,7 +1,7 @@
 const { nanoid } = require('nanoid');
 const { v4: uuidv4 } = require('uuid');
 const { logger } = require('@askargus/data-schemas');
-const { Callback, ToolEndHandler, formatAgentMessages } = require('@askargus/agents');
+const { Callback, ToolEndHandler, formatAgentMessages } = require('@vediyappanm05/agents');
 const { EModelEndpoint, ResourceType, PermissionBits } = require('askargus-data-provider');
 const {
   createRun,

@@ -1,5 +1,5 @@
 const { v4 } = require('uuid');
-const { sleep } = require('@askargus/agents');
+const { sleep } = require('@vediyappanm05/agents');
 const { logger } = require('@askargus/data-schemas');
 const {
   sendEvent,
