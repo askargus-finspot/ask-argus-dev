@@ -1,0 +1,75 @@
+{
+  "name": "@askargus/investigator",
+  "version": "0.2.0",
+  "description": "LangGraph investigation orchestrator for multi-domain observability queries (postgres, mysql, neo4j, elasticsearch, rabbitmq, observability)",
+  "main": "dist/index.js",
+  "types": "./dist/types/index.d.ts",
+  "type": "commonjs",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc",
+    "build:watch": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "verify": "node verify-exports.js",
+    "test": "jest",
+    "test:ci": "jest --ci --coverage"
+  },
+  "keywords": [
+    "langgraph",
+    "langchain",
+    "mcp",
+    "investigation",
+    "observability",
+    "postgres",
+    "mysql",
+    "neo4j",
+    "elasticsearch",
+    "rabbitmq",
+    "prometheus",
+    "loki"
+  ],
+  "author": "AskArgus",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danny-avila/AskArgus.git",
+    "directory": "investigator"
+  },
+  "bugs": {
+    "url": "https://github.com/danny-avila/AskArgus/issues"
+  },
+  "homepage": "https://askargus.ai",
+  "peerDependencies": {
+    "@langchain/core": ">=0.3.0",
+    "@langchain/langgraph": ">=0.4.0",
+    "@modelcontextprotocol/sdk": ">=0.5.0",
+    "zod": ">=3.0.0"
+  },
+  "dependencies": {
+    "@langchain/core": ">=0.3.0",
+    "@langchain/langgraph": ">=0.4.0",
+    "@modelcontextprotocol/sdk": ">=0.5.0",
+    "mongodb": "^6.21.0",
+    "zod": ">=3.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.14.11",
+    "jest": "^30.2.0",
+    "rimraf": "^5.0.0",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.5.3"
+  }
+}

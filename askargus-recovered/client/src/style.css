@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Keyframe Animations */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.brand-panel-gradient {
+  background: linear-gradient(-45deg, #059669, #7c3aed, #0f172a, #065f46);
+  background-size: 400% 400%;
+  animation: gradient-shift 8s ease infinite;
+}
+
 /* Custom Variables */
 :root {
   --white: #fff;
@@ -160,6 +172,9 @@ html {
   --border-heavy: var(--gray-500);
   --border-xheavy: var(--gray-400);
   --border-destructive: var(--red-500);
+  /* Dark mode dual-accent: green primary, indigo secondary */
+  --ring-primary: var(--green-500);
+  --ring-secondary: #6366f1; /* indigo-500 */
   /* These are test styles */
 
   --background: 0 0% 7%;

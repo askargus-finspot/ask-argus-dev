@@ -102,7 +102,7 @@ const LoginForm: React.FC<TLoginFormProps> = ({ onSubmit, startupConfig, error, 
                   : (value) => validateEmail(value, localize('com_auth_email_pattern')),
               })}
               aria-invalid={!!errors.email}
-              className="webkit-dark-styles transition-color peer w-full rounded-2xl border border-border-light bg-surface-primary px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:border-green-500 focus:outline-none"
+              className="webkit-dark-styles transition-color peer w-full rounded-xl border border-white/10 bg-white/5 px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:ring-2 focus:ring-green-500/50 focus:border-green-500 focus:outline-none dark:bg-white/5"
               placeholder=" "
             />
             <label
@@ -132,7 +132,7 @@ const LoginForm: React.FC<TLoginFormProps> = ({ onSubmit, startupConfig, error, 
                 maxLength: { value: 128, message: localize('com_auth_password_max_length') },
               })}
               aria-invalid={!!errors.password}
-              className="webkit-dark-styles transition-color peer w-full rounded-2xl border border-border-light bg-surface-primary px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:border-green-500 focus:outline-none"
+              className="webkit-dark-styles transition-color peer w-full rounded-xl border border-white/10 bg-white/5 px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:ring-2 focus:ring-green-500/50 focus:border-green-500 focus:outline-none dark:bg-white/5"
               placeholder=" "
             />
             <label
@@ -175,7 +175,7 @@ const LoginForm: React.FC<TLoginFormProps> = ({ onSubmit, startupConfig, error, 
             type="submit"
             disabled={(requireCaptcha && !turnstileToken) || isSubmitting}
             variant="submit"
-            className="h-12 w-full rounded-2xl"
+            className="h-12 w-full rounded-xl bg-gradient-to-r from-green-600 to-emerald-500 font-semibold tracking-tight transition-all duration-300 hover:from-green-500 hover:to-emerald-400 hover:shadow-lg hover:shadow-green-500/20"
           >
             {isSubmitting ? <Spinner /> : localize('com_auth_continue')}
           </Button>

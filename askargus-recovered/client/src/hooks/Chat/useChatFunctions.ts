@@ -34,11 +34,39 @@ import { startupConfigKey } from '~/data-provider';
 import useUserKey from '~/hooks/Input/useUserKey';
 import { useAuthContext } from '~/hooks';
 
+const INVESTIGATOR_PREFIX = '/investigate';
+
 const logChatRequest = (request: Record<string, unknown>) => {
   logger.log('=====================================\nAsk function called with:');
   logger.dir(request);
   logger.log('=====================================');
 };
+
+function isInvestigatorCommand(text: string): boolean {
+  return text.trim().toLowerCase().startsWith(INVESTIGATOR_PREFIX);
+}
+
+function getInvestigatorSymptom(text: string): string {
+  const trimmed = text.trim();
+  return trimmed.slice(INVESTIGATOR_PREFIX.length).trim() || trimmed;
+}
+
+function normalizeInvestigatorContent(data: {
+  displaySummary?: string;
+  summary?: string;
+  contentParts?: unknown[];
+}) {
+  if (Array.isArray(data.contentParts) && data.contentParts.length > 0) {
+    return data.contentParts;
+  }
+
+  return [
+    {
+      type: ContentTypes.TEXT,
+      text: data.displaySummary || data.summary || 'Investigator completed without a summary.',
+    },
+  ];
+}
 
 export default function useChatFunctions({
   index = 0,
@@ -115,6 +143,108 @@ export default function useChatFunctions({
     conversationId = conversationId ?? conversation?.conversationId ?? null;
     if (conversationId == 'search') {
       console.error('cannot send any message under search view!');
+      return;
+    }
+
+    if (isInvestigatorCommand(text)) {
+      const currentMessages: TMessage[] = overrideMessages ?? getMessages() ?? [];
+      const intermediateId = overrideUserMessageId ?? v4();
+      const responseMessageId = `${intermediateId}_`;
+      const parentId = parentMessageId ?? latestMessage?.messageId ?? Constants.NO_PARENT;
+      const targetConversationId = conversationId === Constants.NEW_CONVO ? null : conversationId;
+      const symptom = getInvestigatorSymptom(text);
+
+      if (conversationId == Constants.NEW_CONVO) {
+        navigate('/c/new', { state: { focusChat: true } });
+      }
+
+      const userMessage: TMessage = {
+        text,
+        sender: 'User',
+        clientTimestamp: new Date().toLocaleString('sv').replace(' ', 'T'),
+        isCreatedByUser: true,
+        parentMessageId: parentId,
+        conversationId: targetConversationId,
+        messageId: intermediateId,
+        error: false,
+      };
+
+      const responseMessage: TMessage = {
+        sender: 'Investigator',
+        text: '',
+        endpoint: 'investigator',
+        parentMessageId: intermediateId,
+        messageId: responseMessageId,
+        conversationId: targetConversationId,
+        unfinished: true,
+        isCreatedByUser: false,
+        model: 'investigator',
+        error: false,
+        content: [
+          {
+            type: ContentTypes.TEXT,
+            text: 'Running investigator...',
+          },
+        ],
+      };
+
+      setIsSubmitting(true);
+      setShowStopButton(false);
+      setMessages([...currentMessages, userMessage, responseMessage]);
+      if (index === 0 && setLatestMessage) {
+        setLatestMessage(responseMessage);
+      }
+
+      void fetch('/api/investigator/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          symptom,
+          endpoint: 'NVIDIA',
+          maxIterations: 1,
+          mcpEndpoints: {
+            mysql: 'http://host.docker.internal:5001/mcp/sse',
+          },
+        }),
+      })
+        .then(async (response) => {
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            throw new Error(data?.error || `Investigator request failed with ${response.status}`);
+          }
+          const completedResponse: TMessage = {
+            ...responseMessage,
+            text: data.displaySummary || data.summary || '',
+            unfinished: false,
+            content: normalizeInvestigatorContent(data) as TMessage['content'],
+          };
+          setMessages([...currentMessages, userMessage, completedResponse]);
+          if (index === 0 && setLatestMessage) {
+            setLatestMessage(completedResponse);
+          }
+        })
+        .catch((error) => {
+          const errorResponse: TMessage = {
+            ...responseMessage,
+            text: error instanceof Error ? error.message : 'Investigator request failed',
+            unfinished: false,
+            error: true,
+            content: [
+              {
+                type: ContentTypes.ERROR,
+                [ContentTypes.ERROR]:
+                  error instanceof Error ? error.message : 'Investigator request failed',
+              },
+            ] as TMessage['content'],
+          };
+          setMessages([...currentMessages, userMessage, errorResponse]);
+          if (index === 0 && setLatestMessage) {
+            setLatestMessage(errorResponse);
+          }
+        })
+        .finally(() => {
+          setIsSubmitting(false);
+        });
       return;
     }
 

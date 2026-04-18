@@ -57,40 +57,63 @@ function AuthLayout({
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-white dark:bg-gray-900">
+    <div className="relative flex min-h-screen flex-col bg-white dark:bg-gray-950">
       <Banner />
-      <BlinkAnimation active={isFetching}>
-        <div className="mt-6 h-10 w-full bg-cover">
-          <img
-            src="assets/logo.svg"
-            className="h-full w-full object-contain"
-            alt={localize('com_ui_logo', { 0: startupConfig?.appTitle ?? 'AskArgus' })}
-          />
+      <div className="flex min-h-screen flex-1">
+        {/* Left Brand Panel - 40% */}
+        <div className="brand-panel-gradient hidden w-[40%] flex-col items-center justify-center md:flex">
+          <div className="flex flex-col items-center gap-6 text-white">
+            <img
+              src="assets/logo.svg"
+              className="h-24 w-auto object-contain"
+              alt={localize('com_ui_logo', { 0: startupConfig?.appTitle ?? 'AskArgus' })}
+            />
+            <h2 className="text-2xl font-bold tracking-tight">
+              {startupConfig?.appTitle ?? 'AskArgus'}
+            </h2>
+            <p className="text-center text-white/80">
+              {localize('com_auth_welcome')}
+            </p>
+          </div>
         </div>
-      </BlinkAnimation>
-      <DisplayError />
-      <div className="absolute bottom-0 left-0 md:m-4">
-        <ThemeSelector />
-      </div>
 
-      <main className="flex flex-grow items-center justify-center">
-        <div className="w-authPageWidth overflow-hidden bg-white px-6 py-4 dark:bg-gray-900 sm:max-w-md sm:rounded-lg">
-          {!hasStartupConfigError && !isFetching && header && (
-            <h1
-              className="mb-4 text-center text-3xl font-semibold text-black dark:text-white"
-              style={{ userSelect: 'none' }}
-            >
-              {header}
-            </h1>
-          )}
-          {children}
-          {!pathname.includes('2fa') &&
-            (pathname.includes('login') || pathname.includes('register')) && (
-              <SocialLoginRender startupConfig={startupConfig} />
+        {/* Right Form Panel - 60% */}
+        <div className="flex w-full flex-1 flex-col items-center justify-center bg-gray-50 px-6 py-4 dark:bg-gray-950 md:w-[60%]">
+          <BlinkAnimation active={isFetching}>
+            <div className="mb-6 h-10 w-full md:hidden bg-cover">
+              <img
+                src="assets/logo.svg"
+                className="h-full w-full object-contain"
+                alt={localize('com_ui_logo', { 0: startupConfig?.appTitle ?? 'AskArgus' })}
+              />
+            </div>
+          </BlinkAnimation>
+
+          <DisplayError />
+
+          <div className="w-full max-w-md overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm px-6 py-8 shadow-lg dark:bg-gray-900/50">
+            {!hasStartupConfigError && !isFetching && header && (
+              <h1
+                className="mb-4 text-center text-2xl font-bold tracking-tight text-black dark:text-white"
+                style={{ userSelect: 'none' }}
+              >
+                {header}
+              </h1>
             )}
+            {children}
+            {!pathname.includes('2fa') &&
+              (pathname.includes('login') || pathname.includes('register')) && (
+                <SocialLoginRender startupConfig={startupConfig} />
+              )}
+          </div>
+
+          <div className="absolute bottom-0 left-0 md:m-4">
+            <ThemeSelector />
+          </div>
+
+          <Footer startupConfig={startupConfig} />
         </div>
-      </main>
-      <Footer startupConfig={startupConfig} />
+      </div>
     </div>
   );
 }

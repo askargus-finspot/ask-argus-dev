@@ -1,6 +1,6 @@
 {
   "name": "@askargus/backend",
-  "version": "v0.8.4",
+  "version": "0.0.1",
   "description": "",
   "scripts": {
     "start": "echo 'please run this from the root directory'",
@@ -44,7 +44,7 @@
     "@google/genai": "^1.19.0",
     "@keyv/redis": "^4.3.3",
     "@langchain/core": "^0.3.80",
-    "@vediyappanm05/agents": "^4.0.0",
+    "@vediyappanm05/agents": "^4.1.1",
     "@askargus/api": "*",
     "@askargus/data-schemas": "*",
     "@microsoft/microsoft-graph-client": "^3.0.7",

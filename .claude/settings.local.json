@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep *)",
+      "Bash(npx tsc *)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(bun run *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k,':',v\\) for k,v in d.get\\('scripts',{}\\).items\\(\\)]\")",
+      "Bash(docker history *)",
+      "Bash(docker exec *)",
+      "Bash(docker cp *)",
+      "Bash(docker commit *)",
+      "Bash(docker compose *)"
+    ]
+  }
+}

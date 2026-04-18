@@ -1,6 +1,6 @@
 services:
   api:
-    image: AskArgus-ai:latest
+    image: askargus-local:latest
     container_name: AskArgus-AI
     environment:
       - MONGO_URI=mongodb://mongodb:27017/AskArgus
