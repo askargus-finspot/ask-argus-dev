@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
-import DOMPurify from 'dompurify';
 import { useForm, Controller } from 'react-hook-form';
 import { Input, Label, Button } from '@askargus/client';
 import { useMCPAuthValuesQuery } from '~/data-provider/Tools/queries';
 import { useLocalize } from '~/hooks';
+import { sanitizeHtml } from '~/utils';
 
 export interface CustomUserVarConfig {
   title: string;
@@ -30,33 +30,12 @@ function AuthField({ name, config, hasValue, control, errors, autoFocus }: AuthF
   const localize = useLocalize();
   const statusText = hasValue ? localize('com_ui_set') : localize('com_ui_unset');
 
-  const sanitizer = useMemo(() => {
-    const instance = DOMPurify();
-    instance.addHook('afterSanitizeAttributes', (node) => {
-      if (node.tagName && node.tagName === 'A') {
-        node.setAttribute('target', '_blank');
-        node.setAttribute('rel', 'noopener noreferrer');
-      }
-    });
-    return instance;
-  }, []);
-
   const sanitizedDescription = useMemo(() => {
     if (!config.description) {
       return '';
     }
-    try {
-      return sanitizer.sanitize(config.description, {
-        ALLOWED_TAGS: ['a', 'strong', 'b', 'em', 'i', 'br', 'code'],
-        ALLOWED_ATTR: ['href', 'class', 'target', 'rel'],
-        ALLOW_DATA_ATTR: false,
-        ALLOW_ARIA_ATTR: false,
-      });
-    } catch (error) {
-      console.error('Sanitization failed', error);
-      return config.description;
-    }
-  }, [config.description, sanitizer]);
+    return sanitizeHtml(config.description);
+  }, [config.description]);
 
   return (
     <div className="space-y-2">

@@ -1,0 +1,24 @@
+sources:
+  elasticsearch-source:
+    kind: elasticsearch
+    addresses:
+      - ${MCP_ELASTICSEARCH_HOST}
+    username: ${MCP_ELASTICSEARCH_USERNAME}
+    password: ${MCP_ELASTICSEARCH_PASSWORD}
+
+tools:
+  execute_esql_query:
+    kind: elasticsearch-execute-esql
+    source: elasticsearch-source
+    description: >-
+      Execute Elasticsearch ES|QL queries. Prefer small, answer-focused queries:
+      aggregate with STATS before returning raw rows, KEEP only the fields needed
+      for the user's answer, SORT only after reducing data, and always include a
+      LIMIT of 100 or less unless the user explicitly asks for a larger sample.
+      For log/error analysis, first count by index, endpoint, status code, host,
+      or time bucket, then request small samples only for evidence.
+    format: json
+
+toolsets:
+  elasticsearch-tools:
+    - execute_esql_query

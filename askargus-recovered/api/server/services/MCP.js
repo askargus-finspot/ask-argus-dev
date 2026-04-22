@@ -583,6 +583,11 @@ function createToolInstance({
   }
 
   const normalizedToolKey = `${toolName}${Constants.mcp_delimiter}${normalizeServerName(serverName)}`;
+  const enhancedDescription = getMCPToolDescription({
+    toolName,
+    serverName,
+    description,
+  });
 
   /** @type {(toolArguments: Object | string, config?: GraphRunnableConfig) => Promise<unknown>} */
   const _call = async (toolArguments, config) => {
@@ -688,13 +693,44 @@ function createToolInstance({
   const toolInstance = tool(_call, {
     schema,
     name: normalizedToolKey,
-    description: description || '',
+    description: enhancedDescription,
     responseFormat: AgentConstants.CONTENT_AND_ARTIFACT,
   });
   toolInstance.mcp = true;
   toolInstance.mcpRawServerName = serverName;
   toolInstance.mcpJsonSchema = parameters;
   return toolInstance;
+}
+
+function getMCPToolDescription({ toolName, serverName, description }) {
+  const baseDescription = description || '';
+  const normalizedServerName = normalizeServerName(serverName);
+
+  if (normalizedServerName !== 'observability') {
+    return baseDescription;
+  }
+
+  const prometheusGuidance = `
+
+Prometheus/Kubernetes guidance:
+- This is the Prometheus observability MCP. Use it for natural requests about Kubernetes pods, nodes, namespaces, deployments, containers, scrape targets, metrics, CPU, memory, uptime, and health.
+- If the user asks to list pods, show pods, get pods, or asks "all pods", call execute_query with PromQL kube_pod_info and group results by namespace. Include pod, namespace, node, and created_by_kind/created_by_name labels when present.
+- If the user asks for running pods, call execute_query with PromQL kube_pod_status_phase{phase="Running"} == 1.
+- If the user asks for pod counts by namespace, call execute_query with PromQL count by (namespace) (kube_pod_info).
+- If the user asks for failed, pending, or succeeded pods, use kube_pod_status_phase with the requested phase.
+- If a Kubernetes metric is unavailable, first call list_metrics to discover matching kube_pod, kube_node, kube_deployment, kube_namespace, or container metrics before saying it cannot be done.
+- Do not tell the user Prometheus cannot list pods when kube-state-metrics metrics are available. Prometheus can list pods through kube_pod_info.
+`.trim();
+
+  if (toolName === 'execute_query') {
+    return `${baseDescription}\n\n${prometheusGuidance}`;
+  }
+
+  if (toolName === 'list_metrics') {
+    return `${baseDescription}\n\nUse this to discover Kubernetes metrics before refusing Kubernetes observability questions. Look for kube_pod_info, kube_pod_status_phase, kube_node_info, kube_deployment_labels, kube_namespace_labels, and container_* metrics.`;
+  }
+
+  return baseDescription;
 }
 
 /**

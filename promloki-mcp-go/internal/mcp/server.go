@@ -225,12 +225,44 @@ func (s *Server) handleMCP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	resp := s.dispatch(req)
+	if sessionID := r.URL.Query().Get("sessionId"); sessionID != "" {
+		if len(req.ID) == 0 {
+			w.WriteHeader(http.StatusAccepted)
+			return
+		}
+		if !s.sendSSEMessage(sessionID, resp) {
+			http.Error(w, "session not found", http.StatusNotFound)
+			return
+		}
+		w.WriteHeader(http.StatusAccepted)
+		return
+	}
 	if len(req.ID) == 0 {
 		w.WriteHeader(http.StatusAccepted)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (s *Server) sendSSEMessage(sessionID string, resp jsonRPCResponse) bool {
+	raw, err := json.Marshal(resp)
+	if err != nil {
+		return false
+	}
+	s.mu.Lock()
+	ch, ok := s.sessions[sessionID]
+	s.mu.Unlock()
+	if !ok {
+		return false
+	}
+	event := fmt.Sprintf("event: message\ndata: %s\n\n", string(raw))
+	select {
+	case ch <- event:
+		return true
+	case <-time.After(5 * time.Second):
+		return false
+	}
 }
 
 func (s *Server) dispatch(req jsonRPCRequest) jsonRPCResponse {

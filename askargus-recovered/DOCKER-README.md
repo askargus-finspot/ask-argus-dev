@@ -1,57 +1,36 @@
-# AskArgus Docker Setup (UI + DB Only)
+# AskArgus Minimal Docker Setup
 
-## Architecture
+This setup is intentionally limited to two containers:
 
-```
-askargus-compose.yaml
-├── askargus-ui (askargus-local) ── port 3082:3080
-│   ├── volumes: askargus.env, askargus-ui.yaml, images/, uploads/
-│   └── depends_on: db
-└── askargus-db (mongo:8.0.20)
-```
+- `api`: the AskArgus app and UI on `http://localhost:3080`
+- `mongodb`: the MongoDB database, internal to the compose network
 
-Matches the **finspot-ai** pattern exactly — 2 containers only.
+No RAG API, Meilisearch, pgvector, external NGINX, MCP sidecars, or provider-key config is mounted by this minimal compose file.
 
-## Files Created
+## Files
 
 | File | Purpose |
 |---|---|
-| `askargus-compose.yaml` | Standalone Docker Compose (ui + db only) |
-| `askargus.env` | Environment variables (SEARCH=false, no RAG/meilisearch) |
-| `askargus-ui.yaml` | Full UI config: Grok, OpenRouter, Groq, Mistral, NVIDIA, LocalLLM + MCP |
-| `askargus-mcp.yaml` | Separate MCP-only config (Elasticsearch, Prometheus, Grafana) |
-| `Dockerfile.askargus-local` | Builds `askargus-local` image |
+| `docker-compose.minimal.yml` | Two-container app + MongoDB stack |
+| `.env` | Local runtime secrets; ignored by Git |
+| `.env.example` | Safe placeholder template for `.env` |
 
-## Build & Run
+## First Run
 
 ```powershell
-# 1. Build the image
-docker build -f Dockerfile.askargus-local -t askargus-local .
-
-# 2. Run
-docker compose -f askargus-compose.yaml up -d
-
-# 3. Access at http://localhost:3082
+Copy-Item .env.example .env
 ```
 
-## Port Mapping
+Replace every `CHANGE_ME` value in `.env` with strong random values.
 
-| Container | Host → Container |
-|---|---|
-| askargus-ui | 3082 → 3080 |
-| askargus-db | internal only |
+Then run:
 
-## MCP Servers (in askargus-ui.yaml)
+```powershell
+docker compose -f docker-compose.minimal.yml up -d
+```
 
-- **Elasticsearch**: `http://host.docker.internal:8085/mcp/sse`
-- **Prometheus**: `http://host.docker.internal:8081/sse`
-- **Grafana**: `http://host.docker.internal:8086/mcp/sse`
+Open `http://localhost:3080`.
 
-## AI Endpoints (in askargus-ui.yaml)
+## MongoDB Auth Note
 
-Grok, OpenRouter, Groq, Mistral, NVIDIA NIM, LocalLLM (`http://llm-server:8080/v1`)
-
-## Fixed Issues
-
-- Removed broken `askargus.yaml` bind mount from `docker-compose.override.yml`
-- Disabled search/meilisearch/RAG (not needed for 2-container setup)
+MongoDB is started with authentication enabled. If `data-node/` already contains an old unauthenticated database, Mongo will not automatically create the root user. For a fresh secure local DB, stop the stack and reinitialize `data-node/`. To preserve old data, create an admin user before switching fully to authenticated Mongo.

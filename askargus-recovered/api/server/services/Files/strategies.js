@@ -13,17 +13,6 @@ const {
   uploadGoogleVertexMistralOCR,
 } = require('@askargus/api');
 const {
-  getFirebaseURL,
-  prepareImageURL,
-  saveURLToFirebase,
-  deleteFirebaseFile,
-  saveBufferToFirebase,
-  uploadFileToFirebase,
-  uploadImageToFirebase,
-  processFirebaseAvatar,
-  getFirebaseFileStream,
-} = require('./Firebase');
-const {
   uploadLocalFile,
   getLocalFileURL,
   saveFileFromURL,
@@ -65,17 +54,11 @@ const { uploadVectors, deleteVectors } = require('./VectorDB');
  * Firebase Storage Strategy Functions
  *
  * */
-const firebaseStrategy = () => ({
-  handleFileUpload: uploadFileToFirebase,
-  saveURL: saveURLToFirebase,
-  getFileURL: getFirebaseURL,
-  deleteFile: deleteFirebaseFile,
-  saveBuffer: saveBufferToFirebase,
-  prepareImagePayload: prepareImageURL,
-  processAvatar: processFirebaseAvatar,
-  handleImageUpload: uploadImageToFirebase,
-  getDownloadStream: getFirebaseFileStream,
-});
+const firebaseStrategy = () => {
+  throw new Error(
+    'Firebase storage is disabled in the backend build. Use local, S3, or Azure storage, or migrate this strategy to firebase-admin before enabling it.',
+  );
+};
 
 /**
  * Local Server Storage Strategy Functions

@@ -1,9 +1,9 @@
-services:
+﻿services:
   api:
     image: askargus-local:latest
     container_name: AskArgus-AI
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/AskArgus
+      - MONGO_URI=mongodb://${MONGO_USERNAME:?Set MONGO_USERNAME in .env}:${MONGO_PASSWORD:?Set MONGO_PASSWORD in .env}@mongodb:27017/AskArgus?authSource=admin
     extra_hosts:
       - "llm-server:172.16.0.65"
     # Note: askargus.yaml mount removed - use askargus-ui.yaml with askargus-compose.yaml instead

@@ -1,13 +1,4 @@
 {
-  "com_investigator_title": "Investigator",
-  "com_investigator_symptom_label": "Describe the symptom",
-  "com_investigator_symptom_placeholder": "e.g. High latency on order API, spike in error rate, slow DB queries...",
-  "com_investigator_time_range": "Specify time range",
-  "com_investigator_run": "Investigate",
-  "com_investigator_running": "Investigating...",
-  "com_investigator_summary": "Summary",
-  "com_investigator_findings": "Findings",
-  "com_investigator_tool_activity": "Tool Activity",
   "chat_direction_left_to_right": "Left to Right",
   "chat_direction_right_to_left": "Right to Left",
   "com_a11y_ai_composing": "The AI is still composing.",

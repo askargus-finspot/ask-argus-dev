@@ -1,5 +1,4 @@
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const { webcrypto } = require('node:crypto');
 const {
   logger,
@@ -34,6 +33,7 @@ const {
 const { registerSchema } = require('~/strategies/validators');
 const { getAppConfig } = require('~/server/services/Config');
 const { sendEmail } = require('~/server/utils');
+const { signJwt } = require('~/server/utils/jwt');
 
 const domains = {
   client: process.env.DOMAIN_CLIENT,
@@ -547,7 +547,7 @@ const setOpenIDAuthTokens = (tokenset, req, res, userId, existingRefreshToken) =
     });
     if (userId && isEnabled(process.env.OPENID_REUSE_TOKENS)) {
       /** JWT-signed user ID cookie for image path validation when OPENID_REUSE_TOKENS is enabled */
-      const signedUserId = jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET, {
+      const signedUserId = signJwt({ id: userId }, process.env.JWT_REFRESH_SECRET, {
         expiresIn: expiryInMilliseconds / 1000,
       });
       res.cookie('openid_user_id', signedUserId, {

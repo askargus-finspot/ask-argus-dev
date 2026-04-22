@@ -48,21 +48,21 @@ mcpSettings:
   allowedDomains:
     - 'host.docker.internal'
     - 'localhost'
+    - 'mcp-obs'
+    - 'mcp-es'
 
-# MCP Servers configuration
+# MCP Servers configuration - connecting to dev-test MCP servers
 mcpServers:
-  postgres:
+  observability:
     type: sse
-    title: PostgreSQL Server
-    url: http://host.docker.internal:5000/mcp/sse
-  mysql:
-    type: sse
-    title: MySQL Server
-    url: http://host.docker.internal:5001/mcp/sse
+    title: Prometheus Server
+    url: http://mcp-obs:8080/sse
+    headers:
+      Authorization: "Bearer dev_token_123"
   elasticsearch:
     type: sse
     title: Elasticsearch Server
-    url: http://host.docker.internal:5002/mcp/sse
+    url: http://mcp-es:5000/mcp/sse
 
 # Definition of custom endpoints
 endpoints:
@@ -133,7 +133,7 @@ endpoints:
 
     # NVIDIA NIM Configuration
     - name: 'NVIDIA'
-      apiKey: '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'
+      apiKey: '${NVIDIA_API_KEY}'
       baseURL: 'https://integrate.api.nvidia.com/v1'
       models:
         default:

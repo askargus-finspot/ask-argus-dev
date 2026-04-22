@@ -314,8 +314,8 @@ function getBaseSamlConfig() {
     entryPoint: process.env.SAML_ENTRY_POINT,
     issuer: process.env.SAML_ISSUER,
     idpCert: getCertificateContent(process.env.SAML_CERT),
-    wantAssertionsSigned: process.env.SAML_USE_AUTHN_RESPONSE_SIGNED === 'true' ? false : true,
-    wantAuthnResponseSigned: process.env.SAML_USE_AUTHN_RESPONSE_SIGNED === 'true' ? true : false,
+    wantAssertionsSigned: true,
+    wantAuthnResponseSigned: true,
   };
 }
 

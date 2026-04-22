@@ -10,7 +10,6 @@ import {
 } from '~/components/Auth';
 import { MarketplaceProvider } from '~/components/Agents/MarketplaceContext';
 import AgentMarketplace from '~/components/Agents/Marketplace';
-import InvestigatorPage from '~/components/Investigator/InvestigatorPage';
 import { OAuthSuccess, OAuthError } from '~/components/OAuth';
 import { AuthContextProvider } from '~/hooks/AuthContext';
 import RouteErrorBoundary from './RouteErrorBoundary';
@@ -127,10 +126,6 @@ export const router = createBrowserRouter(
                   <AgentMarketplace />
                 </MarketplaceProvider>
               ),
-            },
-            {
-              path: 'investigator',
-              element: <InvestigatorPage />,
             },
           ],
         },

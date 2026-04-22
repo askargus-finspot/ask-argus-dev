@@ -41,7 +41,7 @@ const shouldRebase = process.argv.includes('--rebase');
   execSync(downCommand, { stdio: 'inherit' });
 
   console.purple('Removing all tags for AskArgus `deployed` images...');
-  const repositories = ['registry.askargus.ai/danny-avila/askargus-dev-api', 'askargus-client'];
+  const repositories = ['askargus-api-local', 'askargus-client'];
   repositories.forEach((repo) => {
     const imageRefs = execSync(`sudo docker images ${repo} --format "{{.Repository}}:{{.Tag}}"`, {
       encoding: 'utf8',

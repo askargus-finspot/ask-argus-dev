@@ -1,4 +1,3 @@
-const jwt = require('jsonwebtoken');
 const { nanoid } = require('nanoid');
 const { tool } = require('@langchain/core/tools');
 const { GraphEvents, sleep } = require('@vediyappanm05/agents');
@@ -30,6 +29,7 @@ const {
 } = require('~/models');
 const { getFlowStateManager } = require('~/config');
 const { getLogStores } = require('~/cache');
+const { signJwt } = require('~/server/utils/jwt');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const toolNameRegex = /^[a-zA-Z0-9_-]+$/;
@@ -214,7 +214,7 @@ async function createActionTool({
                 action_id,
               };
 
-              const stateToken = jwt.sign(statePayload, JWT_SECRET, { expiresIn: '10m' });
+              const stateToken = signJwt(statePayload, JWT_SECRET, { expiresIn: '10m' });
               try {
                 const redirectUri = `${process.env.DOMAIN_CLIENT}/api/actions/${action_id}/oauth/callback`;
                 const params = new URLSearchParams({

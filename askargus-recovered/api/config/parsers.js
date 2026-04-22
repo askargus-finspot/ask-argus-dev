@@ -1,6 +1,5 @@
 const { klona } = require('klona');
 const winston = require('winston');
-const traverse = require('traverse');
 
 const SPLAT_SYMBOL = Symbol.for('splat');
 const MESSAGE_SYMBOL = Symbol.for('message');
@@ -96,6 +95,36 @@ const condenseArray = (item) => {
   return item;
 };
 
+const BLOCKED_TRAVERSAL_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
+
+const walkOwnProperties = (value, visitor, parentPath = '') => {
+  if (value === null || typeof value !== 'object') {
+    return;
+  }
+
+  for (const key of Object.keys(value)) {
+    if (BLOCKED_TRAVERSAL_KEYS.has(key)) {
+      continue;
+    }
+
+    const child = value[key];
+    const path = parentPath ? `${parentPath}.${key}` : key;
+    const isLeaf = child === null || typeof child !== 'object';
+    visitor({
+      key,
+      path,
+      value: child,
+      parentPath,
+      isLeaf,
+      isArray: Array.isArray(child),
+    });
+
+    if (!isLeaf && !Array.isArray(child)) {
+      walkOwnProperties(child, visitor, path);
+    }
+  }
+};
+
 /**
  * Formats log messages for debugging purposes.
  * - Truncates long strings within log messages.
@@ -147,37 +176,22 @@ const debugTraverse = winston.format.printf(({ level, message, timestamp, ...met
     msg += '\n{';
 
     const copy = klona(metadata);
-    traverse(copy).forEach(function (value) {
-      if (typeof this?.key === 'symbol') {
-        return;
-      }
+    walkOwnProperties(copy, ({ key, parentPath, value, isLeaf, isArray }) => {
+      const tabs = parentPath ? '    ' : '  ';
+      const parentKey = parentPath ? `${parentPath}.` : '';
 
-      let _parentKey = '';
-      const parent = this.parent;
-
-      if (typeof parent?.key !== 'symbol' && parent?.key) {
-        _parentKey = parent.key;
-      }
-
-      const parentKey = `${parent && parent.notRoot ? _parentKey + '.' : ''}`;
-
-      const tabs = `${parent && parent.notRoot ? '    ' : '  '}`;
-
-      const currentKey = this?.key ?? 'unknown';
-
-      if (this.isLeaf && typeof value === 'string') {
+      if (isLeaf && typeof value === 'string') {
         const truncatedText = truncateLongStrings(value);
-        msg += `\n${tabs}${parentKey}${currentKey}: ${JSON.stringify(truncatedText)},`;
-      } else if (this.notLeaf && Array.isArray(value) && value.length > 0) {
-        const currentMessage = `\n${tabs}// ${value.length} ${currentKey.replace(/s$/, '')}(s)`;
-        this.update(currentMessage, true);
+        msg += `\n${tabs}${parentKey}${key}: ${JSON.stringify(truncatedText)},`;
+      } else if (isArray && value.length > 0) {
+        const currentMessage = `\n${tabs}// ${value.length} ${key.replace(/s$/, '')}(s)`;
         msg += currentMessage;
         const stringifiedArray = value.map(condenseArray);
-        msg += `\n${tabs}${parentKey}${currentKey}: [${stringifiedArray}],`;
-      } else if (this.isLeaf && typeof value === 'function') {
-        msg += `\n${tabs}${parentKey}${currentKey}: function,`;
-      } else if (this.isLeaf) {
-        msg += `\n${tabs}${parentKey}${currentKey}: ${value},`;
+        msg += `\n${tabs}${parentKey}${key}: [${stringifiedArray}],`;
+      } else if (isLeaf && typeof value === 'function') {
+        msg += `\n${tabs}${parentKey}${key}: function,`;
+      } else if (isLeaf) {
+        msg += `\n${tabs}${parentKey}${key}: ${value},`;
       }
     });
 

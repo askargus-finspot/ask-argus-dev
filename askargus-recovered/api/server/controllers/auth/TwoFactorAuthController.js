@@ -1,4 +1,3 @@
-const jwt = require('jsonwebtoken');
 const { logger } = require('@askargus/data-schemas');
 const {
   verifyTOTP,
@@ -7,6 +6,7 @@ const {
 } = require('~/server/services/twoFactorService');
 const { setAuthTokens } = require('~/server/services/AuthService');
 const { getUserById } = require('~/models');
+const { verifyJwt } = require('~/server/utils/jwt');
 
 /**
  * Verifies the 2FA code during login using a temporary token.
@@ -20,7 +20,7 @@ const verify2FAWithTempToken = async (req, res) => {
 
     let payload;
     try {
-      payload = jwt.verify(tempToken, process.env.JWT_SECRET);
+      payload = verifyJwt(tempToken, process.env.JWT_SECRET);
     } catch (err) {
       logger.error('Failed to verify temporary token:', err);
       return res.status(401).json({ message: 'Invalid or expired temporary token' });

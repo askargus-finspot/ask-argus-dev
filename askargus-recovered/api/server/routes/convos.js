@@ -1,4 +1,5 @@
 const multer = require('multer');
+const fs = require('fs');
 const express = require('express');
 const { sleep } = require('@vediyappanm05/agents');
 const { isEnabled, resolveImportMaxFileSize } = require('@askargus/api');
@@ -240,6 +241,24 @@ const upload = multer({
 });
 const uploadSingle = upload.single('file');
 
+async function cleanupUploadedFile(req) {
+  if (req.file?.path) {
+    await fs.promises.unlink(req.file.path).catch(() => {});
+  }
+}
+
+async function isJsonUpload(filepath) {
+  const fd = await fs.promises.open(filepath, 'r');
+  try {
+    const buffer = Buffer.alloc(512);
+    const { bytesRead } = await fd.read(buffer, 0, buffer.length, 0);
+    const sample = buffer.subarray(0, bytesRead).toString('utf8').trimStart();
+    return sample.startsWith('{') || sample.startsWith('[');
+  } finally {
+    await fd.close();
+  }
+}
+
 function handleUpload(req, res, next) {
   uploadSingle(req, res, (err) => {
     if (err && err.code === 'LIMIT_FILE_SIZE') {
@@ -248,7 +267,20 @@ function handleUpload(req, res, next) {
     if (err) {
       return next(err);
     }
-    next();
+    if (!req.file?.path) {
+      return res.status(400).json({ message: 'File is required' });
+    }
+
+    isJsonUpload(req.file.path)
+      .then((valid) => {
+        if (!valid) {
+          return cleanupUploadedFile(req).then(() =>
+            res.status(400).json({ message: 'Only valid JSON files are allowed' }),
+          );
+        }
+        next();
+      })
+      .catch((uploadErr) => next(uploadErr));
   });
 }
 

@@ -10,10 +10,46 @@ const {
 } = require('askargus-data-provider');
 const { getAppConfig } = require('~/server/services/Config');
 
+const MAX_FILENAME_LENGTH = 255;
+const JSON_MIME_TYPES = new Set(['application/json', 'text/json', 'application/ld+json']);
+const SAFE_USER_ID_PATTERN = /^[a-zA-Z0-9_-]+$/;
+
+function decodeOriginalName(originalname = '') {
+  try {
+    return decodeURIComponent(originalname);
+  } catch {
+    return originalname;
+  }
+}
+
+function hasSafeFilename(originalname = '') {
+  return (
+    typeof originalname === 'string' &&
+    originalname.length > 0 &&
+    originalname.length <= MAX_FILENAME_LENGTH &&
+    !originalname.includes('\x00')
+  );
+}
+
+function isPathInside(parent, child) {
+  const relativePath = path.relative(parent, child);
+  return relativePath === '' || (!!relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath));
+}
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const appConfig = req.config;
-    const outputPath = path.join(appConfig.paths.uploads, 'temp', req.user.id);
+    const userId = req.user?.id;
+    if (!SAFE_USER_ID_PATTERN.test(userId || '')) {
+      return cb(new Error('Invalid upload user context'));
+    }
+
+    const tempRoot = path.resolve(appConfig.paths.uploads, 'temp');
+    const outputPath = path.resolve(tempRoot, userId);
+    if (!isPathInside(tempRoot, outputPath)) {
+      return cb(new Error('Invalid upload destination'));
+    }
+
     if (!fs.existsSync(outputPath)) {
       fs.mkdirSync(outputPath, { recursive: true });
     }
@@ -21,20 +57,33 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     req.file_id = crypto.randomUUID();
-    file.originalname = decodeURIComponent(file.originalname);
-    const sanitizedFilename = sanitizeFilename(file.originalname);
+    const decodedName = path.basename(decodeOriginalName(file.originalname));
+    if (!hasSafeFilename(decodedName)) {
+      return cb(new Error('Invalid filename'));
+    }
+
+    file.originalname = decodedName;
+    const sanitizedFilename = sanitizeFilename(decodedName);
+    if (!hasSafeFilename(sanitizedFilename)) {
+      return cb(new Error('Invalid sanitized filename'));
+    }
+
     cb(null, sanitizedFilename);
   },
 });
 
 const importFileFilter = (req, file, cb) => {
-  if (file.mimetype === 'application/json') {
-    cb(null, true);
-  } else if (path.extname(file.originalname).toLowerCase() === '.json') {
-    cb(null, true);
-  } else {
-    cb(new Error('Only JSON files are allowed'), false);
+  const originalname = decodeOriginalName(file?.originalname);
+  if (!hasSafeFilename(originalname)) {
+    return cb(new Error('Invalid filename'), false);
   }
+
+  const extension = path.extname(path.basename(originalname)).toLowerCase();
+  if (extension !== '.json' || !JSON_MIME_TYPES.has(file.mimetype)) {
+    return cb(new Error('Only JSON files are allowed'), false);
+  }
+
+  cb(null, true);
 };
 
 /**
@@ -52,7 +101,12 @@ const createFileFilter = (customFileConfig) => {
       return cb(new Error('No file provided'), false);
     }
 
-    if (req.originalUrl.endsWith('/speech/stt') && file.mimetype.startsWith('audio/')) {
+    const originalname = decodeOriginalName(file.originalname);
+    if (!hasSafeFilename(originalname)) {
+      return cb(new Error('Invalid filename'), false);
+    }
+
+    if (req.originalUrl.endsWith('/speech/stt') && file.mimetype?.startsWith('audio/')) {
       return cb(null, true);
     }
 
@@ -64,7 +118,10 @@ const createFileFilter = (customFileConfig) => {
       endpointType,
     });
 
-    if (!defaultFileConfig.checkType(file.mimetype, endpointFileConfig.supportedMimeTypes)) {
+    if (
+      !file.mimetype ||
+      !defaultFileConfig.checkType(file.mimetype, endpointFileConfig.supportedMimeTypes)
+    ) {
       return cb(new Error('Unsupported file type: ' + file.mimetype), false);
     }
 

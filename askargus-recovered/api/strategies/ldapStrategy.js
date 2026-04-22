@@ -31,6 +31,26 @@ if (!LDAP_URL || !LDAP_USER_SEARCH_BASE) {
   module.exports = null;
 }
 
+const LDAP_CONTROL_CHARACTER_PATTERN = /[\x00-\x1f\x7f]/;
+
+const validateLdapUsername = (username) => {
+  if (typeof username !== 'string' || username.length === 0 || username.length > 320) {
+    return false;
+  }
+
+  return !LDAP_CONTROL_CHARACTER_PATTERN.test(username);
+};
+
+const credentialsLookup = (req) => {
+  const username = req.body?.email ?? req.query?.email;
+  const password = req.body?.password ?? req.query?.password;
+  if (!validateLdapUsername(username) || typeof password !== 'string' || password.length === 0) {
+    return null;
+  }
+
+  return { username, password };
+};
+
 const searchAttributes = [
   'displayName',
   'mail',
@@ -83,9 +103,11 @@ const ldapOptions = {
   },
   usernameField: 'email',
   passwordField: 'password',
+  credentialsLookup,
+  passReqToCallback: true,
 };
 
-const ldapLogin = new LdapStrategy(ldapOptions, async (userinfo, done) => {
+const ldapLogin = new LdapStrategy(ldapOptions, async (req, userinfo, done) => {
   if (!userinfo) {
     return done(null, false, { message: 'Invalid credentials' });
   }

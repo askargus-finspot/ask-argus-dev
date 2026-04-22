@@ -1,5 +1,4 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const { logger } = require('@askargus/data-schemas');
 const { CacheKeys } = require('askargus-data-provider');
 const {
@@ -16,6 +15,7 @@ const { findToken, updateToken, createToken } = require('~/models');
 const { requireJwtAuth } = require('~/server/middleware');
 const { getFlowStateManager } = require('~/config');
 const { getLogStores } = require('~/cache');
+const { verifyJwt } = require('~/server/utils/jwt');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -62,7 +62,7 @@ router.get('/:action_id/oauth/callback', async (req, res) => {
   try {
     let decodedState;
     try {
-      decodedState = jwt.verify(state, JWT_SECRET);
+      decodedState = verifyJwt(state, JWT_SECRET);
     } catch (err) {
       logger.error('Error verifying state parameter:', err);
       await flowManager.failFlow(identifier, 'oauth', 'Invalid or expired state parameter');

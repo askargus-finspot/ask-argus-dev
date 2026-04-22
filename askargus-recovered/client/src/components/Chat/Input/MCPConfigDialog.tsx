@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Button, Input, Label, OGDialog, OGDialogTemplate } from '@askargus/client';
 import type { ConfigFieldDetail } from '~/common';
 import { useLocalize } from '~/hooks';
+import { sanitizeHtml } from '~/utils';
 
 interface MCPConfigDialogProps {
   isOpen: boolean;
@@ -51,6 +52,15 @@ export default function MCPConfigDialog({
     }
   };
 
+  const sanitizedDescriptions = useMemo(() => {
+    return Object.fromEntries(
+      Object.entries(fieldsSchema).map(([key, details]) => [
+        key,
+        details.description ? sanitizeHtml(details.description) : '',
+      ]),
+    );
+  }, [fieldsSchema]);
+
   const dialogTitle = localize('com_ui_configure_mcp_variables_for', { 0: serverName });
 
   return (
@@ -80,10 +90,10 @@ export default function MCPConfigDialog({
                     />
                   )}
                 />
-                {details.description && (
+                {sanitizedDescriptions[key] && (
                   <p
                     className="text-xs text-text-secondary [&_a]:text-blue-500 [&_a]:hover:text-blue-600 dark:[&_a]:text-blue-400 dark:[&_a]:hover:text-blue-300"
-                    dangerouslySetInnerHTML={{ __html: details.description }}
+                    dangerouslySetInnerHTML={{ __html: sanitizedDescriptions[key] }}
                   />
                 )}
                 {errors[key] && <p className="text-xs text-red-500">{errors[key]?.message}</p>}

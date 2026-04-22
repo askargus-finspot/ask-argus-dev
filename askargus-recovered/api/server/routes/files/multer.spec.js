@@ -127,20 +127,16 @@ describe('Multer Configuration', () => {
         storage.getFilename(mockReq, unsafeFile, cb);
       });
 
-      it('should handle very long filenames with actual crypto', (done) => {
+      it('should reject very long filenames', (done) => {
         const longFile = {
           ...mockFile,
           originalname: 'a'.repeat(300) + '.jpg',
         };
 
         const cb = jest.fn((err, filename) => {
-          expect(err).toBeNull();
-          expect(filename.length).toBeLessThanOrEqual(255);
-          expect(filename).toMatch(/\.jpg$/); // Should still end with .jpg
-          // Should contain a hex suffix if truncated
-          if (filename.length === 255) {
-            expect(filename).toMatch(/-[a-f0-9]{6}\.jpg$/);
-          }
+          expect(err).toBeInstanceOf(Error);
+          expect(err.message).toBe('Invalid filename');
+          expect(filename).toBeUndefined();
           done();
         });
 
@@ -189,7 +185,7 @@ describe('Multer Configuration', () => {
       importFileFilter(mockReq, jsonFile, cb);
     });
 
-    it('should accept files with .json extension', (done) => {
+    it('should reject files with .json extension but non-JSON mimetype', (done) => {
       const jsonFile = {
         ...mockFile,
         mimetype: 'text/plain',
@@ -197,8 +193,9 @@ describe('Multer Configuration', () => {
       };
 
       const cb = jest.fn((err, result) => {
-        expect(err).toBeNull();
-        expect(result).toBe(true);
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe('Only JSON files are allowed');
+        expect(result).toBe(false);
         done();
       });
 
@@ -222,10 +219,27 @@ describe('Multer Configuration', () => {
       importFileFilter(mockReq, textFile, cb);
     });
 
-    it('should handle files with uppercase .JSON extension', (done) => {
+    it('should reject uppercase .JSON files with non-JSON mimetype', (done) => {
       const jsonFile = {
         ...mockFile,
         mimetype: 'text/plain',
+        originalname: 'DATA.JSON',
+      };
+
+      const cb = jest.fn((err, result) => {
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe('Only JSON files are allowed');
+        expect(result).toBe(false);
+        done();
+      });
+
+      importFileFilter(mockReq, jsonFile, cb);
+    });
+
+    it('should accept uppercase .JSON files with JSON mimetype', (done) => {
+      const jsonFile = {
+        ...mockFile,
+        mimetype: 'application/json',
         originalname: 'DATA.JSON',
       };
 

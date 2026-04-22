@@ -1,7 +1,7 @@
 const cookies = require('cookie');
-const jwt = require('jsonwebtoken');
 const { logger } = require('@askargus/data-schemas');
 const { isEnabled, getBasePath } = require('@askargus/api');
+const { verifyJwt } = require('~/server/utils/jwt');
 
 const OBJECT_ID_LENGTH = 24;
 const OBJECT_ID_PATTERN = /^[0-9a-f]{24}$/i;
@@ -28,7 +28,7 @@ function isValidObjectId(id) {
  */
 function validateToken(refreshToken) {
   try {
-    const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const payload = verifyJwt(refreshToken, process.env.JWT_REFRESH_SECRET);
 
     if (!isValidObjectId(payload.id)) {
       return { valid: false, error: 'Invalid User ID' };
