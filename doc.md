@@ -22,7 +22,9 @@ pass:linkedeye
 
 
 
+PROMOTHESES URL :https://uatprometheus.finspot.in/
 
+GRAFANA : https://uatgrafana.finspot.in/
 
 
 

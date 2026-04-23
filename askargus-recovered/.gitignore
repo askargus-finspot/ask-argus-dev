@@ -9,6 +9,10 @@ client/node_modules/
 
 dist/
 client/dist/
+!client/dist/
+!client/dist/**
+!packages/**/dist/
+!packages/**/dist/**
 build/
 coverage/
 

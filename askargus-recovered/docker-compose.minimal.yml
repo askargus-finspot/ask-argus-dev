@@ -1,6 +1,9 @@
 services:
   api:
     image: askargus-local:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.minimal-local
     container_name: AskArgus-AI
     ports:
       - "3080:3080"

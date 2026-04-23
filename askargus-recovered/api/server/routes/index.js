@@ -31,10 +31,8 @@ const auth = require('./auth');
 const keys = require('./keys');
 const user = require('./user');
 const mcp = require('./mcp');
-const investigator = require('./investigator');
 
 module.exports = {
-  investigator,
   mcp,
   auth,
   adminAuth,
