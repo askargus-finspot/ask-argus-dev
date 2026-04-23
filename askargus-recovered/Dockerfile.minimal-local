@@ -18,6 +18,9 @@ RUN --mount=type=cache,target=/root/.npm \
   && ln -s /app/node_modules/@vediyappanm05/agents /app/node_modules/@askargus/agents \
   && ln -s /app/node_modules/@vediyappanm05/agents /app/api/node_modules/@askargus/agents \
   && for pkg in api data-provider data-schemas; do rm -rf "/app/packages/$pkg/node_modules"; ln -s /app/api/node_modules "/app/packages/$pkg/node_modules"; done \
+  && mkdir -p /app/packages/data-schemas/dist/node_modules \
+  && ln -s /app/node_modules/dotenv /app/packages/data-schemas/dist/node_modules/dotenv \
+  && printf '%s\n' "'use strict'; const d = require('./lib/main'); module.exports = { __require: function() { d.config(); } };" > /app/node_modules/dotenv/config.cjs \
   && npm cache clean --force
 
 FROM node:20-bookworm-slim AS runtime
