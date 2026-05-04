@@ -1,3 +1,0 @@
-import type { TCustomConfig, TMemoryConfig } from 'askargus-data-provider';
-export declare function loadMemoryConfig(config: TCustomConfig['memory']): TMemoryConfig | undefined;
-export declare function isMemoryEnabled(config: TMemoryConfig | undefined): boolean;
